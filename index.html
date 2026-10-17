@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>信用卡市場與同業分析</title>
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg?v=2">
+<link rel="alternate icon" href="assets/favicon.ico?v=2">
+<link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container header-inner">
+    <div class="header-title-group">
+      <h1>信用卡市場與同業分析</h1>
+    </div>
+    <div class="header-controls">
+      <button type="button" class="export-btn" id="export-btn">⭳ 匯出 CSV</button>
+    </div>
+  </div>
+</header>
+
+<div class="sticky-bar" id="sticky-bar">
+  <div class="container sticky-bar-inner">
+    <div class="main-tabs" id="main-tabs" role="tablist" aria-label="主要頁籤"></div>
+    <button type="button" class="sticky-toggle" id="sticky-toggle" aria-expanded="false" aria-controls="sticky-controls"></button>
+    <div class="sticky-controls" id="sticky-controls">
+      <label class="sticky-field">資料月份 <select id="period-select" aria-label="選擇資料月份"></select></label>
+      <label class="sticky-field" id="sticky-metric-field">指標
+        <select class="metric-select sticky-metric-select" aria-label="選擇指標"></select>
+      </label>
+      <div class="period-type-toggle" id="sticky-period-type-toggle" hidden>
+        <button type="button" class="period-type-btn" data-period-type="month">單月</button>
+        <button type="button" class="period-type-btn" data-period-type="ytd">年初至今（YTD）</button>
+      </div>
+      <span class="sticky-compare-label" id="sticky-compare-label" hidden></span>
+      <span class="sticky-custom-period" id="sticky-custom-period" hidden></span>
+      <div class="range-switch" id="sticky-range-group" role="group" aria-label="切換趨勢圖期間">
+        <button type="button" class="range-btn is-active" data-range="6">近6個月</button>
+        <button type="button" class="range-btn" data-range="12">近12個月</button>
+        <button type="button" class="range-btn" data-range="custom">自訂期間</button>
+      </div>
+    </div>
+  </div>
+  <div class="custom-range-panel container" id="custom-range-panel" hidden>
+    <label>開始月份 <select id="custom-start"></select></label>
+    <label>結束月份 <select id="custom-end"></select></label>
+    <button type="button" class="toggle-btn" id="custom-range-apply">套用</button>
+    <button type="button" class="toggle-btn toggle-btn--ghost" id="custom-range-reset">重設</button>
+    <p class="scope-note is-warning" id="custom-range-warning" hidden></p>
+  </div>
+</div>
+
+<main class="container" id="app-root" aria-busy="true" hidden>
+
+  <div id="load-status" class="status-banner" role="status">正在讀取 data/processed 標準資料…</div>
+
+  <!-- ===================== 市場總覽 ===================== -->
+  <section class="tab-panel" id="tab-overview" role="tabpanel">
+
+    <div class="panel panel--headline">
+      <h2>本月管理摘要</h2>
+      <ul class="mgmt-summary-list" id="management-summary-list"></ul>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head-row">
+        <div>
+          <h2>市場與遠銀｜核心指標比較</h2>
+        </div>
+        <div class="basis-control">
+          <div class="period-type-toggle" id="ov-basis-switch" role="group" aria-label="發卡與消費數據">
+            <button type="button" class="period-type-btn is-active" data-basis="ytd">年初至今（YTD）</button>
+            <button type="button" class="period-type-btn" data-basis="month">單月</button>
+          </div>
+        </div>
+      </div>
+      <p class="overview-basis-note" id="overview-basis-line"></p>
+      <div class="table-scroll">
+        <table class="overview-table" id="overview-table">
+          <colgroup>
+            <col class="ov-col-metric">
+            <col class="ov-col-market">
+            <col class="ov-col-fareast">
+            <col class="ov-col-rel">
+            <col class="ov-col-rank">
+          </colgroup>
+          <thead>
+            <tr>
+              <th scope="col">指標</th>
+              <th scope="col" class="th-market">整體市場</th>
+              <th scope="col" class="th-fareast">遠銀</th>
+              <th scope="col">相對市場表現<span class="th-sub">YOY差：遠銀－市場</span></th>
+              <th scope="col">銀行排名（30家）<span class="th-sub">變化較去年同期</span></th>
+            </tr>
+          </thead>
+          <tbody id="overview-table-tbody"></tbody>
+        </table>
+      </div>
+      <p class="overview-scale-note" id="overview-scale-note"></p>
+    </div>
+
+    <details class="methodology-details container" id="methodology-details">
+  <summary>資料來源與計算說明</summary>
+  <div class="methodology-content">
+    <div class="meta-bar" id="meta-bar">
+      <span id="meta-period">資料期間：載入中…</span>
+      <span class="meta-sep">｜</span>
+      <span id="meta-source">來源檔案：載入中…</span>
+      <span class="meta-sep">｜</span>
+      <span id="meta-loaded">頁面資料讀取時間：—</span>
+    </div>
+
+    <h3 class="subhead subhead--sm">資料來源與計算說明</h3>
+    <p>金管會銀行局「信用卡業務統計附表五」；累計簽帳金額、流通卡數、有效卡率為本國發卡機構之一般消費卡（含VISA、Mastercard、JCB、銀聯），排除公司卡。</p>
+
+    <h3 class="subhead subhead--sm">可瀏覽範圍與113年基期規則</h3>
+    <ul class="methodology-list">
+      <li>網站自民國114年1月起提供查詢；民國113年資料僅作為114年年增率（YoY）與YTD年增率之比較基期，不於月份選單、趨勢圖或明細查詢中出現。</li>
+      <li>114年可利用113年同期資料計算YoY；115年以114年同期資料計算YoY。</li>
+    </ul>
+    <h3 class="subhead subhead--sm">首頁計算說明</h3>
+    <ul class="methodology-list">
+      <li>YOY為同期成長率（本期÷去年同期−1），單位%；適用於流通卡數、有效卡數、發卡數、簽帳金額、流通卡每卡簽帳金額及信用卡應收帳款。</li>
+      <li>有效卡率的年度變化為本期比率－去年同期比率，單位pp，標示為「較去年同期」，不是百分比成長率。</li>
+      <li>遠銀與市場比較：數量、金額與每卡金額為遠銀YOY－市場YOY（pp）；有效卡率為當期遠銀比率－當期市場比率（pp）；信用卡應收帳款以「成長高於／低於市場」表示，不直接判斷經營優劣。</li>
+      <li>發卡數、兩種簽帳金額及流通卡每卡簽帳金額預設年初至今累計（YTD），可切換為單月；流通卡數、有效卡數、有效卡率及信用卡應收帳款為所選當月值。</li>
+      <li>排名比較：當月指標與去年同月排名比較；YTD指標與去年同期累計排名比較；銀行同業排名母體為30家銀行。缺去年同期資料顯示「缺同期資料」，不視為持平。</li>
+      <li>色彩：紅色為數值增加、排名上升、相對市場超前；綠色為數值減少、排名下降、相對市場落後；灰色為持平或缺資料；橘色為遠銀識別，灰藍色為市場識別。</li>
+    </ul>
+
+    <h3 class="subhead subhead--sm">排名母體與主要同業定義</h3>
+    <ul class="methodology-list">
+      <li>發卡機構排名母體固定為全部32家發卡機構；銀行同業排名母體固定為30家銀行，均不因篩選或僅顯示部分名單而改變。</li>
+      <li>2家非銀行發卡機構（台灣樂天信用卡、台灣美國運通國際）保留發卡機構排名，銀行同業排名顯示「—」。</li>
+      <li>「主要同業」固定定義為所選月份流通卡數前12名銀行，不因切換比較指標而更換成員；遠銀即使不在前12名仍固定顯示。</li>
+    </ul>
+
+    <h3 class="subhead subhead--sm">單月、YTD與月底值定義</h3>
+    <ul class="methodology-list">
+      <li>流量型指標（發卡數、簽帳金額、簽帳金額＋預借現金、流通卡每卡簽帳金額）同時提供單月與年初至今（YTD）數據方式；YTD為當年度1月至所選月份加總，每年1月重新起算。</li>
+      <li>存量型指標（流通卡數、有效卡數、有效卡率）為月底時點值，不計算YTD累計。</li>
+      <li>信用卡應收帳款（原「總資產」欄位，已更名避免誤解）＝循環信用餘額＋未到期分期付款餘額，為月底時點值，不做YTD加總；此數字僅為信用卡應收帳款規模，並非遠銀整體資產負債表之總資產，不可混用。</li>
+    </ul>
+
+    <h3 class="subhead subhead--sm">判讀原則</h3>
+    <ul class="methodology-list">
+      <li>「本行自身變化」＝遠銀本期與去年同期比較之YoY，僅描述本行自己的成長或衰退，不涉及市場比較。</li>
+      <li>「相對市場表現」＝遠銀YoY－市場YoY，保留正負號；正值以「超前市場」呈現，負值以「落後市場」呈現。遠銀自身正成長但落後市場時，不得描述為「本行衰退」。</li>
+      <li>比率型指標（有效卡率等）之期間變化一律使用百分點（pp），不計算一般成長率。</li>
+      <li>排名數字越小越好；排名變化＝比較期排名－本期排名，正值為進步。</li>
+      <li>全站配色採臺灣股票看盤習慣（紅漲、綠跌）：數值成長／上升／排名進步／相對市場領先為紅色，下降／衰退／排名退步／相對市場落後為綠色，持平或無法判定為灰色；顏色僅為輔助，所有方向性資訊皆同時搭配文字與正負號／箭頭。市場（灰藍）與遠銀（橘）之圖表識別色固定不變，不受漲跌影響，與此處判讀色分屬不同用途。信用卡應收帳款之增減僅代表方向（上升／下降／高於或低於市場），不代表經營好壞之價值判斷。</li>
+      <li>修正註記（r／R）：原始檔標註前導字母代表該筆數值於申報日後曾異動，已正確解析並保留於 <code>data/processed/source_metadata.json</code>。</li>
+    </ul>
+
+    <h3 class="subhead subhead--sm">主要公式</h3>
+    <ul class="methodology-list">
+      <li>有效卡率 ＝ 有效卡數 ÷ 流通卡數 × 100%；為比率型指標，僅提供排名，不提供市占率（比率無法計算市占率）。</li>
+      <li>市占率 ＝ 機構數值 ÷ 市場合計數值 × 100%（市場數值優先採官方合計列，並與32家明細加總交叉驗證）；僅適用於可加總之金額型指標。</li>
+      <li>簽帳金額＋預借現金 ＝ 當月（或YTD）簽帳金額 ＋ 當月（或YTD）預借現金金額</li>
+      <li>流通卡每卡簽帳金額 ＝ 簽帳金額（元）÷ 當月流通卡數；單月與YTD皆僅提供排名，不提供市占率（每卡平均無法計算市占率）。</li>
+      <li>信用卡應收帳款 ＝ 循環信用餘額 ＋ 未到期分期付款餘額；為可加總之金額型指標，提供市占率與排名。</li>
+      <li>金額原始單位為新臺幣千元，頁面以億元或元／張呈現；完整公式詳見 <code>docs/calculation-rules.md</code>。</li>
+    </ul>
+  </div>
+</details>
+  </section>
+
+  <!-- ===================== 趨勢分析 ===================== -->
+  <section class="tab-panel" id="tab-trends" role="tabpanel" hidden>
+    <div class="panel">
+      <h2>趨勢分析</h2>
+      <p class="trend-unavailable" id="trends-unavailable" hidden></p>
+
+      <div id="trends-body">
+        <p class="trend-period-caption" id="trend-period-caption"></p>
+        <div class="trend-grid">
+          <article class="trend-card" id="trend-card-market">
+            <h3 class="trend-card-title" id="trend-title-market"></h3>
+            <p class="trend-card-unit" id="trend-unit-market"></p>
+            <div class="trend-legend" id="trend-legend-market"></div>
+            <div class="trend-chart" id="trend-chart-market"></div>
+            <p class="trend-note" id="trend-note-market"></p>
+          </article>
+          <article class="trend-card" id="trend-card-fareast">
+            <h3 class="trend-card-title" id="trend-title-fareast"></h3>
+            <p class="trend-card-unit" id="trend-unit-fareast"></p>
+            <div class="trend-legend" id="trend-legend-fareast"></div>
+            <div class="trend-chart" id="trend-chart-fareast"></div>
+            <p class="trend-note" id="trend-note-fareast"></p>
+          </article>
+          <article class="trend-card" id="trend-card-compare">
+            <h3 class="trend-card-title" id="trend-title-compare"></h3>
+            <p class="trend-card-unit" id="trend-unit-compare"></p>
+            <div class="trend-legend" id="trend-legend-compare"></div>
+            <div class="trend-chart" id="trend-chart-compare"></div>
+            <p class="trend-note" id="trend-note-compare"></p>
+          </article>
+          <article class="trend-card" id="trend-card-position">
+            <h3 class="trend-card-title" id="trend-title-position"></h3>
+            <p class="trend-card-unit" id="trend-unit-position"></p>
+            <div class="trend-legend" id="trend-legend-position"></div>
+            <div class="trend-chart" id="trend-chart-position"></div>
+            <p class="trend-note" id="trend-note-position"></p>
+          </article>
+        </div>
+
+        <h2 class="section-title" id="diagnosis-title">遠銀表現診斷</h2>
+        <p class="diagnosis-subtitle" id="diagnosis-subtitle"></p>
+        <div class="diagnosis-summary" id="diagnosis-summary"></div>
+        <div class="diag-board" id="diagnosis-selected-grid"></div>
+        <details class="methodology-details diagnosis-methodology" id="diagnosis-methodology">
+          <summary>計算說明</summary>
+          <ul class="methodology-list">
+            <li>年度變化：本期 ÷ 去年同期（或去年同月）− 1，單位為 %；比率型指標為本期比率 − 去年同期比率，單位為 pp。</li>
+            <li>年初至今（YTD）：自當年 1 月起累計；比較基準為去年同期累計。僅發卡數與簽帳金額依所選數據方式呈現單月或年初至今累計；流通卡每卡簽帳金額依既有公式計算，不直接加總各月每卡金額。</li>
+            <li>流通卡數、有效卡數、有效卡率及信用卡應收帳款為當月（月底）值，不累加，不計算年初至今累計。</li>
+            <li>YOY差距（遠銀－市場）：遠銀年度變化減市場年度變化，單位為 pp，正值表示超前市場、負值表示落後市場。</li>
+            <li>市占率變化：本期市占率減去年同期市占率，單位為 pp。</li>
+            <li>排名變化：去年同期銀行排名減本期銀行排名，正值表示上升（名次數字變小）；排名母體為 30 家銀行。</li>
+          </ul>
+        </details>
+        <details class="other-metrics-details" id="other-metrics-details">
+          <summary>查看其他指標</summary>
+          <p class="diag-all-note">同期變化以去年同期為比較基期；公式見上方「計算說明」。</p>
+          <div class="table-scroll">
+            <table class="metric-table diagnosis-table diagnosis-all">
+              <thead>
+                <tr>
+                  <th scope="col" class="align-left">指標</th>
+                  <th scope="col">遠銀數值</th>
+                  <th scope="col">遠銀同期變化</th>
+                  <th scope="col">市場同期變化</th>
+                  <th scope="col">相對市場表現</th>
+                  <th scope="col">市占率同期變化</th>
+                  <th scope="col">銀行排名變化</th>
+                </tr>
+              </thead>
+              <tbody id="diagnosis-tbody"></tbody>
+            </table>
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 同業比較 ===================== -->
+  <section class="tab-panel" id="tab-peers" role="tabpanel" hidden>
+    <div class="peers-scope-bar" id="peers-scope-panel">
+      <span class="peers-scope-label">比較範圍</span>
+      <div class="scope-switch" role="group" aria-label="比較範圍">
+        <button type="button" class="scope-btn is-active" data-scope="top12" aria-pressed="true">流通卡前12大銀行</button>
+        <button type="button" class="scope-btn" data-scope="all" aria-pressed="false">全部發卡機構</button>
+      </div>
+      <span class="scope-note">排名於所選範圍內計算；市占率以整體市場計算。</span>
+    </div>
+
+    <div class="panel">
+      <h2 id="peers-summary-title">遠銀排名與同業差距</h2>
+      <p class="peers-condition" id="peers-condition"></p>
+      <p class="competitive-unavailable" id="peers-unavailable" hidden></p>
+      <div class="peer-stat-grid" id="peers-summary"></div>
+    </div>
+
+    <div class="panel" id="peers-table-wrap">
+      <h2 id="peers-table-title">流通卡前12大銀行｜同業比較</h2>
+      <p class="peers-condition" id="peers-table-caption"></p>
+      <p class="peers-market-line" id="peers-market-line"></p>
+      <div class="peers-toolbar">
+        <div class="peers-search-wrap">
+          <input type="search" id="peers-search" class="detail-search-input" placeholder="搜尋機構名稱或簡稱" aria-label="搜尋機構名稱">
+          <button type="button" class="ghost-btn" id="peers-search-clear" hidden>清除搜尋</button>
+        </div>
+        <p class="detail-count" id="peers-count"></p>
+      </div>
+      <div class="table-scroll peers-table-scroll">
+        <table class="rank-table peers-table" id="peers-table">
+          <thead></thead>
+          <tbody id="peers-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <details class="methodology-details container" id="peers-methodology">
+      <summary>資料來源與計算說明</summary>
+      <div class="methodology-content">
+        <ul class="methodology-list">
+          <li>流通卡前12大銀行名單：依所選資料月份月底流通卡數，從銀行中選出前12大；名單不隨指標或單月／YTD切換而改變。遠銀入選時標示「本行」，未入選時不額外加入第13家。</li>
+          <li>流通卡前12大銀行模式下，「所選指標排名」「距前一名」「領先後一名」皆於這12家銀行內重新計算（標準競賽排名：並列名次相同、下一名次依序遞補），不等同全部30家銀行的既有排名；表格中的「流通卡數排名」欄僅標示名單選取依據（全30家母體），與所選指標排名為不同口徑，不可混用。</li>
+          <li>全部發卡機構模式使用當月完整發卡機構名單（銀行與非銀行，家數依資料而定）；發卡機構排名沿用既有全量排名欄位。切換範圍、搜尋與排序只改變顯示列，不改變排名、市占率分母或同業排名母體。</li>
+          <li>市占率分母為整體市場定義（市場合計數值），不是比較範圍內的加總；有效卡率與每卡簽帳金額不適用市占率，該欄顯示「不適用」。</li>
+          <li>同期排名比較：當月指標與去年同月排名比較；YTD指標與去年同期（相同累計數據方式）排名比較。流通卡前12大模式下，本期與去年同期分別使用各自當期的前12大名單；遠銀任一期未入選時，明確顯示「不適用」，不強算名次變化。</li>
+          <li>與遠銀差額＝同業所選指標值－遠銀所選指標值。正值表示同業數值高於遠銀，負值表示低於遠銀；差額為數值比較，不代表經營優劣。單位：金額為億元、卡數為張、每卡金額為元／張、有效卡率為pp。</li>
+          <li>距前一名＝前一名數值－遠銀數值；領先後一名＝遠銀數值－後一名數值。兩者僅為目前數值差距，不推論未來排名變化。</li>
+        </ul>
+      </div>
+    </details>
+  </section>
+
+  <!-- ===================== 自訂比較 ===================== -->
+  <section class="tab-panel" id="tab-custom" role="tabpanel" hidden>
+    <div class="custom-head">
+      <h2 class="custom-page-title">自訂比較</h2>
+      <div class="mode-switch" role="group" aria-label="比較模式">
+        <button type="button" class="mode-btn is-active" data-custom-mode="bank" aria-pressed="true">銀行整體概況</button>
+        <button type="button" class="mode-btn" data-custom-mode="compare" aria-pressed="false">多銀行指標比較</button>
+      </div>
+    </div>
+
+    <div id="custom-bank-mode">
+      <div class="panel custom-controls" id="bank-controls">
+        <div class="filter-grid filter-row-1">
+          <div class="filter-field filter-field-bank">
+            <label class="ctl-label" for="bank-combo">銀行</label>
+            <div class="filter-control-row">
+              <input type="text" id="bank-combo" class="ctl-input filter-control" list="bank-datalist" placeholder="輸入或選擇銀行名稱" autocomplete="off">
+              <datalist id="bank-datalist"></datalist>
+              <button type="button" class="ghost-btn filter-control" id="bank-switch-fe">切換遠銀</button>
+            </div>
+          </div>
+          <div class="filter-field filter-field-basis">
+            <span class="ctl-label" id="bank-basis-label">數據方式</span>
+            <div class="seg filter-control" role="group" aria-labelledby="bank-basis-label">
+              <button type="button" class="seg-btn" data-bank-basis="month" aria-pressed="false">單月</button>
+              <button type="button" class="seg-btn" data-bank-basis="ytd" aria-pressed="true">年初至今（YTD）</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="filter-grid filter-row-2">
+          <div class="filter-field filter-field-range">
+            <span class="ctl-label" id="bank-range-label">趨勢期間</span>
+            <div class="seg filter-control" role="group" aria-labelledby="bank-range-label">
+              <button type="button" class="seg-btn" data-bank-range="6" aria-pressed="false">近6個月</button>
+              <button type="button" class="seg-btn" data-bank-range="12" aria-pressed="false">近12個月</button>
+              <button type="button" class="seg-btn" data-bank-range="custom" aria-pressed="false">自訂期間</button>
+            </div>
+          </div>
+          <div class="filter-field filter-field-note">
+            <span class="ctl-label">分析期間</span>
+            <p class="filter-note" id="bank-range-note"></p>
+          </div>
+        </div>
+
+        <div class="custom-range-row" id="bank-custom-wrap" hidden>
+          <div class="filter-field">
+            <label class="ctl-label" for="bank-custom-start">開始月份</label>
+            <select id="bank-custom-start" class="ctl-select filter-control"></select>
+          </div>
+          <div class="filter-field">
+            <label class="ctl-label" for="bank-custom-end">結束月份</label>
+            <select id="bank-custom-end" class="ctl-select filter-control"></select>
+          </div>
+          <p class="filter-note custom-range-msg" id="bank-custom-msg" aria-live="polite"></p>
+        </div>
+      </div>
+
+      <div class="panel" id="bank-print-area">
+        <div class="bank-title-row">
+          <div>
+            <h2 class="bank-title" id="bank-title"></h2>
+            <p class="bank-meta" id="bank-meta"></p>
+          </div>
+          <div class="bank-actions">
+            <button type="button" class="primary-btn" id="bank-print-btn">列印／另存PDF</button>
+            <button type="button" class="ghost-btn" id="bank-csv-btn">下載數據 CSV</button>
+          </div>
+        </div>
+        <div class="bank-cards" id="bank-cards"></div>
+        <p class="scope-note">資料來源：金管會銀行局信用卡業務統計附表五。流通卡數、有效卡數、有效卡率與應收帳款為當月（月底）值；發卡數與簽帳金額依所選單月或年初至今數據方式呈現；流通卡每卡簽帳金額依既有公式計算。</p>
+      </div>
+    </div>
+
+    <div id="custom-compare-mode" hidden>
+      <div class="cmp-layout">
+        <aside class="panel cmp-left">
+          <h3 class="cmp-h">設定比較條件</h3>
+
+          <div class="filter-field">
+            <div class="cmp-field-head">
+              <span class="ctl-label">比較對象</span>
+              <span class="cmp-count" id="cmp-count"></span>
+            </div>
+            <label class="cmp-market-row">
+              <input type="checkbox" id="cmp-market-total">
+              <span class="cmp-market-swatch"></span>
+              <span>整體市場（總計）</span>
+            </label>
+            <input type="search" id="cmp-search" class="ctl-input filter-control" placeholder="搜尋銀行（不會清除已選）" aria-label="搜尋銀行">
+            <div class="cmp-quick">
+              <button type="button" class="ghost-btn" id="cmp-top12">流通卡前12大</button>
+              <button type="button" class="ghost-btn" id="cmp-clear">清除選取</button>
+            </div>
+            <p class="filter-note" id="cmp-ref-note"></p>
+            <div class="cmp-list" id="cmp-list" role="group" aria-label="銀行清單"></div>
+            <div class="cmp-chips" id="cmp-chips"></div>
+            <p class="cmp-limit" id="cmp-limit-msg" hidden></p>
+            <p class="cmp-empty" id="cmp-empty">請至少選擇 1 家銀行或整體市場（總計），選取後即可製圖與下載。</p>
+          </div>
+
+          <div class="filter-field">
+            <label class="ctl-label" for="cmp-metric">指標</label>
+            <select id="cmp-metric" class="ctl-select filter-control"></select>
+          </div>
+
+          <div class="filter-field" id="cmp-basis-wrap">
+            <span class="ctl-label" id="cmp-basis-label">數據方式</span>
+            <div class="seg filter-control" role="group" aria-labelledby="cmp-basis-label">
+              <button type="button" class="seg-btn" data-cmp-basis="month" aria-pressed="false">單月</button>
+              <button type="button" class="seg-btn" data-cmp-basis="ytd" aria-pressed="false">年初至今（YTD）</button>
+            </div>
+          </div>
+
+          <div class="filter-field">
+            <span class="ctl-label" id="cmp-analysis-label">分析方式</span>
+            <div class="seg filter-control" role="group" aria-labelledby="cmp-analysis-label">
+              <button type="button" class="seg-btn" data-cmp-analysis="month" aria-pressed="false">月份比較</button>
+              <button type="button" class="seg-btn" data-cmp-analysis="trend" aria-pressed="false">期間趨勢</button>
+            </div>
+          </div>
+
+          <div class="filter-field">
+            <span class="ctl-label" id="cmp-display-label">顯示數據</span>
+            <div class="seg filter-control" role="group" aria-labelledby="cmp-display-label">
+              <button type="button" class="seg-btn" data-cmp-display="value" aria-pressed="false">本期值</button>
+              <button type="button" class="seg-btn" data-cmp-display="yoy" aria-pressed="false">同期變化</button>
+            </div>
+          </div>
+
+          <div class="filter-field" id="cmp-month-wrap">
+            <span class="ctl-label">資料月份</span>
+            <p class="filter-note" id="cmp-month-note"></p>
+          </div>
+
+          <div class="filter-field" id="cmp-range-wrap">
+            <span class="ctl-label" id="cmp-range-label">趨勢期間</span>
+            <div class="seg filter-control" role="group" aria-labelledby="cmp-range-label">
+              <button type="button" class="seg-btn" data-cmp-range="6" aria-pressed="false">近6個月</button>
+              <button type="button" class="seg-btn" data-cmp-range="12" aria-pressed="false">近12個月</button>
+              <button type="button" class="seg-btn" data-cmp-range="custom" aria-pressed="false">自訂期間</button>
+            </div>
+            <p class="filter-note" id="cmp-range-note"></p>
+            <div class="custom-range-row" id="cmp-custom-wrap" hidden>
+              <div class="filter-field">
+                <label class="ctl-label" for="cmp-custom-start">開始月份</label>
+                <select id="cmp-custom-start" class="ctl-select filter-control"></select>
+              </div>
+              <div class="filter-field">
+                <label class="ctl-label" for="cmp-custom-end">結束月份</label>
+                <select id="cmp-custom-end" class="ctl-select filter-control"></select>
+              </div>
+              <p class="filter-note custom-range-msg" id="cmp-custom-msg" aria-live="polite"></p>
+            </div>
+          </div>
+
+          <button type="button" class="primary-btn cmp-update" id="cmp-update">更新圖表</button>
+          <p class="cmp-dirty" id="cmp-dirty" hidden>條件已變更，圖表尚未更新；請按「更新圖表」後再下載，避免下載到舊圖。</p>
+        </aside>
+
+        <section class="panel cmp-right" aria-label="圖表預覽">
+          <div class="cmp-right-head">
+            <h3 class="cmp-h">圖表預覽</h3>
+            <div class="cmp-actions">
+              <button type="button" class="ghost-btn" id="cmp-csv" disabled>下載數據 CSV</button>
+              <button type="button" class="primary-btn" id="cmp-png" disabled>下載圖片 PNG（16:9）</button>
+            </div>
+          </div>
+          <label class="cmp-title-label">圖表標題（可修改）
+            <input type="text" id="cmp-title-input" class="ctl-input" aria-label="圖表標題">
+          </label>
+          <h3 class="cmp-chart-title" id="cmp-title-text"></h3>
+          <div class="cmp-notes" id="cmp-notes"></div>
+          <div class="cmp-legend" id="cmp-legend"></div>
+          <div class="cmp-chart" id="cmp-chart"></div>
+          <div class="table-scroll cmp-table-wrap" id="cmp-table-wrap"></div>
+        </section>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script src="assets/js/app.js"></script>
+</body>
+</html>

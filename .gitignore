@@ -1,0 +1,89 @@
+# === 作業系統 (Windows) ===
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# === VS Code ===
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+*.code-workspace
+
+# === Node.js ===
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+dist/
+build/
+.next/
+out/
+coverage/
+
+# === Python ===
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+.venv/
+venv/
+env/
+.mypy_cache/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# === 環境變數與機密檔案 ===
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+credentials.json
+
+# === 暫存檔與編輯器備份 ===
+*.tmp
+*.temp
+*.bak
+*.swp
+*~
+
+# === 注意 ===
+# data/raw 與 data/processed 已確認納入版本控制（金管會銀行局公開資料）。
+
+# === 本機產製之月報PPT（不納入版本控制） ===
+output/
+
+# === 信用卡月報／Excel（行內自用，不公開、不納入版本控制） ===
+# 僅供本機使用；原始模板、SAS文件、會計處常董會資料、人工補充口徑設定等內部限定內容，
+# 一律不得進入公開 repo。對應文件已移至 docs/internal/（亦不納入版本控制）。
+config/
+templates/
+docs/internal/
+docs/monthly-report-audit.md
+docs/monthly-report-how-to.md
+docs/monthly-report-pcs-backtest.md
+docs/excel-reports-audit.md
+docs/excel-reports-backtest.md
+docs/excel-reports-source-trace.md
+data/processed/monthly_report.json
+scripts/build_monthly_report.py
+scripts/build_excel_reports.py
+scripts/make_monthly_report.js
+scripts/monthly_report_pptx.js
+scripts/trace_excel_sources.py
+scripts/verify_excel_backtest.py
+scripts/verify_pcs_backtest.py
+tests/test_build_monthly_report.py
+tests/test_excel_reports.py
+tests/test_trace_excel_sources.py
+tests/test_monthly_report_js.js
+tests/fixtures/
+package.json
+package-lock.json
+產製信用卡月報.bat

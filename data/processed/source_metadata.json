@@ -1,0 +1,634 @@
+[
+  {
+    "period": "2024-01",
+    "source_file": "11301_信用卡重要資訊揭露.xlsx",
+    "source_sha256": "e0279737658b45e419360198c303c2b2ac182e9d6432d61bb71b5f3d79915ade",
+    "sheet_name": "11301",
+    "source_unit": "單位：新臺幣千元，卡",
+    "issuer_count": 32,
+    "bank_count": 30,
+    "non_bank_issuer_count": 2,
+    "source_url": null,
+    "validation_status": "PASS",
+    "duplicate_sources": false,
+    "all_source_files": [
+      "11301_信用卡重要資訊揭露.xlsx"
+    ],
+    "selected_source_file": "11301_信用卡重要資訊揭露.xlsx",
+    "dedup_reason": null,
+    "correction_markers": []
+  },
+  {
+    "period": "2024-02",
+    "source_file": "11302_信用卡重要資訊揭露.xlsx",
+    "source_sha256": "e6bf97a4872ec576b3edb1669c3ab127eaa98d0adde6eab339acb78623faeb6e",
+    "sheet_name": "11302",
+    "source_unit": "單位：新臺幣千元，卡",
+    "issuer_count": 32,
+    "bank_count": 30,
+    "non_bank_issuer_count": 2,
+    "source_url": null,
+    "validation_status": "PASS",
+    "duplicate_sources": false,
+    "all_source_files": [
+      "11302_信用卡重要資訊揭露.xlsx"
+    ],
+    "selected_source_file": "11302_信用卡重要資訊揭露.xlsx",
+    "dedup_reason": null,
+    "correction_markers": []
+  },
+  {
+    "period": "2024-03",
+    "source_file": "11303_信用卡重要資訊揭露.xlsx",
+    "source_sha256": "5ddea5b4490183a66de059195351e0db89ba879e7cca219e5598308901d60181",
+    "sheet_name": "11303",
+    "source_unit": "單位：新臺幣千元，卡",
+    "issuer_count": 32,
+    "bank_count": 30,
+    "non_bank_issuer_count": 2,
+    "source_url": null,
+    "validation_status": "PASS",
+    "duplicate_sources": false,
+    "all_source_files": [
+      "11303_信用卡重要資訊揭露.xlsx"
+    ],
+    "selected_source_file": "11303_信用卡重要資訊揭露.xlsx",
+    "dedup_reason": null,
+    "correction_markers": []
+  },
+  {
+    "period": "2024-04",
+    "source_file": "11304_信用卡重要資訊揭露.xlsx",
+    "source_sha256": "b9d8f83143f4c2bed7d916d49f720107622f7d5a3203a8ca21c7bbb9c2d717ee",
+    "sheet_name": "11304",
+    "source_unit": "單位：新臺幣千元，卡",
+    "issuer_count": 32,
+    "bank_count": 30,
+    "non_bank_issuer_count": 2,
+    "source_url": null,
+    "validation_status": "PASS",
+    "duplicate_sources": false,
+    "all_source_files": [
+      "11304_信用卡重要資訊揭露.xlsx"
+    ],
+    "selected_source_file": "11304_信用卡重要資訊揭露.xlsx",
+    "dedup_reason": null,
+    "correction_markers": []
+  },
+  {
+    "period": "2024-05",
+    "source_file": "11305_信用卡重要資訊揭露.xlsx",
+    "source_sha256": "88df59818789c753787a6bf48ca98c060da32cca4f2ce6928476e14b08e65e34",
+    "sheet_name": "11305",
+    "source_unit": "單位：新臺幣千元，卡",
+    "issuer_count": 32,
+    "bank_count": 30,
+    "non_bank_issuer_count": 2,
+    "source_url": null,
+    "validation_status": "PASS",
+    "duplicate_sources": false,
+    "all_source_files": [
+      "11305_信用卡重要資訊揭露.xlsx"
+    ],
+    "selected_source_file": "11305_信用卡重要資訊揭露.xlsx",
+    "dedup_reason": null,
+    "correction_markers": []
+  },
+  {
+    "period": "2024-06",
+    "source_file": "11306_信用卡重要資訊揭露(更正後).xlsx",
+    "source_sha256": "85fa4452df8743a20a37effcebbb8d251a92fee5843d4a2baeb0c9f0119bc139",
+    "sheet_name": "揭露",
+    "source_unit": "單位：新臺幣千元，卡",
+    "issuer_count": 32,
+    "bank_count": 30,
+    "non_bank_issuer_count": 2,
+    "source_url": null,
+    "validation_status": "PASS",
+    "duplicate_sources": false,
+    "all_source_files": [
+      "11306_信用卡重要資訊揭露(更正後).xlsx"
+    ],
+    "selected_source_file": "11306_信用卡重要資訊揭露(更正後).xlsx",
+    "dedup_reason": null,
+    "correction_markers": [
+      {
+        "month": "2024-06",
+        "source_file": "11306_信用卡重要資訊揭露(更正後).xlsx",
+        "row_type": "issuer",
+        "institution": "滙豐(台灣)商業銀行",
+        "field": "purchase_amount_month",
+        "raw_value": "r 9,001,262",
+        "parsed_value": 9001262,
+        "marker": "r",
+        "meaning": "原始檔註明該項資料於申報日後曾異動"
+      },
+      {
+        "month": "2024-06",
+        "source_file": "11306_信用卡重要資訊揭露(更正後).xlsx",
+        "row_type": "market_total",
+        "institution": "總計",
+        "field": "purchase_amount_month",
+        "raw_value": "r565,519,063",
+        "parsed_value": 565519063,
+        "marker": "r",
+        "meaning": "原始檔註明該項資料於申報日後曾異動"
+      }
+    ]
+  },
+  {
+    "period": "2024-07",
+    "source_file": "11307_信用卡重要資訊揭露.xlsx",
+    "source_sha256": "4fde12a37fb59a33444b36f343730083b845c584dfd311fc1b112c5f0c3ade1f",
+    "sheet_name": "11307",
+    "source_unit": "單位：新臺幣千元，卡",
+    "issuer_count": 32,
+    "bank_count": 30,
+    "non_bank_issuer_count": 2,
+    "source_url": null,
+    "validation_status": "PASS",
+    "duplicate_sources": false,
+    "all_source_files": [
+      "11307_信用卡重要資訊揭露.xlsx"
+    ],
+    "selected_source_file": "11307_信用卡重要資訊揭露.xlsx",
+    "dedup_reason": null,
+    "correction_markers": []
+  },
+  {
+    "period": "2024-08",
+    "source_file": "11308_信用卡重要資訊揭露.xlsx",
+    "source_sha256": "bc1c8b11f3bd1e012cc57c2916aff0c90671b86149d9b733994a4d04f064d1fd",
+    "sheet_name": "11308",
+    "source_unit": "單位：新臺幣千元，卡",
+    "issuer_count": 32,
+    "bank_count": 30,
+    "non_bank_issuer_count": 2,
+    "source_url": null,
+    "validation_status": "PASS",
+    "duplicate_sources": false,
+    "all_source_files": [
+      "11308_信用卡重要資訊揭露.xlsx"
+    ],
+    "selected_source_file": "11308_信用卡重要資訊揭露.xlsx",
+    "dedup_reason": null,
+    "correction_markers": []
+  },
+  {
+    "period": "2024-09",
+    "source_file": "11309_信用卡重要資訊揭露.xlsx",
+    "source_sha256": "11351e850904edd320d1e8d839ef4c882e7ce5fa245b180f144c8d5e53b2f470",
+    "sheet_name": "11309",
+    "source_unit": "單位：新臺幣千元，卡",
+    "issuer_count": 32,
+    "bank_count": 30,
+    "non_bank_issuer_count": 2,
+    "source_url": null,
+    "validation_status": "PASS",
+    "duplicate_sources": false,
+    "all_source_files": [
+      "11309_信用卡重要資訊揭露.xlsx"
+    ],
+    "selected_source_file": "11309_信用卡重要資訊揭露.xlsx",
+    "dedup_reason": null,
+    "correction_markers": []
+  },
+  {
+    "period": "2024-10",
+    "source_file": "11310_信用卡重要資訊揭露.xlsx",
+    "source_sha256": "a9cfd7c0047bdbe535ad31c5513c8bf0c9c2d9df898273a8ac55371121f07527",
+    "sheet_name": "揭露.",
+    "source_unit": "單位：新臺幣千元，張",
+    "issuer_count": 32,
+    "bank_count": 30,
+    "non_bank_issuer_count": 2,
+    "source_url": null,
+    "validation_status": "PASS",
+    "duplicate_sources": false,
+    "all_source_files": [
+      "11310_信用卡重要資訊揭露.xlsx"
+    ],
+    "selected_source_file": "11310_信用卡重要資訊揭露.xlsx",
+    "dedup_reason": null,
+    "correction_markers": []
+  },
+  {
+    "period": "2024-11",
+    "source_file": "11311_信用卡重要資訊揭露.xlsx",
+    "source_sha256": "9c367b1ef082c3b500294fd435fa78284037288ca49214df3dddd8b302eb049d",
+    "sheet_name": "揭露.",
+    "source_unit": "單位：新臺幣千元，張",
+    "issuer_count": 32,
+    "bank_count": 30,
+    "non_bank_issuer_count": 2,
+    "source_url": null,
+    "validation_status": "PASS",
+    "duplicate_sources": false,
+    "all_source_files": [
+      "11311_信用卡重要資訊揭露.xlsx"
+    ],
+    "selected_source_file": "11311_信用卡重要資訊揭露.xlsx",
+    "dedup_reason": null,
+    "correction_markers": []
+  },
+  {
+    "period": "2024-12",
+    "source_file": "11312_信用卡重要資訊揭露.xlsx",
+    "source_sha256": "e0e7fcc216518915bb23c3031432e98b4284eada60507ea174a5c2efe86cf4ec",
+    "sheet_name": "揭露.",
+    "source_unit": "單位：新臺幣千元，張",
+    "issuer_count": 32,
+    "bank_count": 30,
+    "non_bank_issuer_count": 2,
+    "source_url": null,
+    "validation_status": "PASS",
+    "duplicate_sources": false,
+    "all_source_files": [
+      "11312_信用卡重要資訊揭露.xlsx"
+    ],
+    "selected_source_file": "11312_信用卡重要資訊揭露.xlsx",
+    "dedup_reason": null,
+    "correction_markers": []
+  },
+  {
+    "period": "2025-01",
+    "source_file": "11401信用卡重要資訊揭露.xlsx",
+    "source_sha256": "292dece1fb9867703746e3a0cd8d318ba072ad863f83d6537cd7fdca6e22e12c",
+    "sheet_name": "揭露.",
+    "source_unit": "單位：新臺幣千元，張",
+    "issuer_count": 32,
+    "bank_count": 30,
+    "non_bank_issuer_count": 2,
+    "source_url": null,
+    "validation_status": "PASS",
+    "duplicate_sources": false,
+    "all_source_files": [
+      "11401信用卡重要資訊揭露.xlsx"
+    ],
+    "selected_source_file": "11401信用卡重要資訊揭露.xlsx",
+    "dedup_reason": null,
+    "correction_markers": []
+  },
+  {
+    "period": "2025-02",
+    "source_file": "11402_信用卡重要資訊揭露.xlsx",
+    "source_sha256": "e8a95cd5000849fdca2b7ed66a538b965d5d71db68909ed7ba22e5f7f45578c4",
+    "sheet_name": "揭露.",
+    "source_unit": "單位：新臺幣千元，張",
+    "issuer_count": 32,
+    "bank_count": 30,
+    "non_bank_issuer_count": 2,
+    "source_url": null,
+    "validation_status": "PASS",
+    "duplicate_sources": false,
+    "all_source_files": [
+      "11402_信用卡重要資訊揭露.xlsx"
+    ],
+    "selected_source_file": "11402_信用卡重要資訊揭露.xlsx",
+    "dedup_reason": null,
+    "correction_markers": []
+  },
+  {
+    "period": "2025-03",
+    "source_file": "11403_信用卡重要資訊揭露.xlsx",
+    "source_sha256": "4bcf63415ca8b7ebceed4c4b878a73ff568eb3b6f15356ab568960da9de5cfa9",
+    "sheet_name": "揭露.",
+    "source_unit": "單位：新臺幣千元，張",
+    "issuer_count": 32,
+    "bank_count": 30,
+    "non_bank_issuer_count": 2,
+    "source_url": null,
+    "validation_status": "PASS",
+    "duplicate_sources": false,
+    "all_source_files": [
+      "11403_信用卡重要資訊揭露.xlsx"
+    ],
+    "selected_source_file": "11403_信用卡重要資訊揭露.xlsx",
+    "dedup_reason": null,
+    "correction_markers": []
+  },
+  {
+    "period": "2025-04",
+    "source_file": "11404_信用卡重要資訊揭露.xlsx",
+    "source_sha256": "0a3d3269a34811896b344fe56cdee0dbb0e2015985a7c26fbbb0af2792c35fc8",
+    "sheet_name": "揭露.",
+    "source_unit": "單位：新臺幣千元，張",
+    "issuer_count": 32,
+    "bank_count": 30,
+    "non_bank_issuer_count": 2,
+    "source_url": null,
+    "validation_status": "PASS",
+    "duplicate_sources": false,
+    "all_source_files": [
+      "11404_信用卡重要資訊揭露.xlsx"
+    ],
+    "selected_source_file": "11404_信用卡重要資訊揭露.xlsx",
+    "dedup_reason": null,
+    "correction_markers": []
+  },
+  {
+    "period": "2025-05",
+    "source_file": "11405_信用卡重要資訊揭露.xlsx",
+    "source_sha256": "64a779b6994ebf6baad6d62c0119a2cdc4616ba1dc02ff3c350a5064ed7141d8",
+    "sheet_name": "揭露.",
+    "source_unit": "單位：新臺幣千元，張",
+    "issuer_count": 32,
+    "bank_count": 30,
+    "non_bank_issuer_count": 2,
+    "source_url": null,
+    "validation_status": "PASS",
+    "duplicate_sources": false,
+    "all_source_files": [
+      "11405_信用卡重要資訊揭露.xlsx"
+    ],
+    "selected_source_file": "11405_信用卡重要資訊揭露.xlsx",
+    "dedup_reason": null,
+    "correction_markers": []
+  },
+  {
+    "period": "2025-06",
+    "source_file": "11406_信用卡重要資訊揭露.xlsx",
+    "source_sha256": "2a16d28cf486bda897703bb79b253c5df57857125da61c92e63b9de8552e6ab7",
+    "sheet_name": "揭露.",
+    "source_unit": "單位：新臺幣千元，張",
+    "issuer_count": 32,
+    "bank_count": 30,
+    "non_bank_issuer_count": 2,
+    "source_url": null,
+    "validation_status": "PASS",
+    "duplicate_sources": false,
+    "all_source_files": [
+      "11406_信用卡重要資訊揭露.xlsx"
+    ],
+    "selected_source_file": "11406_信用卡重要資訊揭露.xlsx",
+    "dedup_reason": null,
+    "correction_markers": []
+  },
+  {
+    "period": "2025-07",
+    "source_file": "11407_信用卡重要資訊揭露.xlsx",
+    "source_sha256": "3290ea790ff5e08f06e2404418250a4442d307bae46549f4d2638cd1607eaa90",
+    "sheet_name": "揭露.",
+    "source_unit": "單位：新臺幣千元，張",
+    "issuer_count": 32,
+    "bank_count": 30,
+    "non_bank_issuer_count": 2,
+    "source_url": null,
+    "validation_status": "PASS",
+    "duplicate_sources": false,
+    "all_source_files": [
+      "11407_信用卡重要資訊揭露.xlsx"
+    ],
+    "selected_source_file": "11407_信用卡重要資訊揭露.xlsx",
+    "dedup_reason": null,
+    "correction_markers": []
+  },
+  {
+    "period": "2025-08",
+    "source_file": "11408_信用卡重要資訊揭露.xlsx",
+    "source_sha256": "78e8e43ec7d46509ef2642f6ca0380e8f2dd4cf153da8d0eec99778092e1459f",
+    "sheet_name": "揭露.",
+    "source_unit": "單位：新臺幣千元，張",
+    "issuer_count": 32,
+    "bank_count": 30,
+    "non_bank_issuer_count": 2,
+    "source_url": null,
+    "validation_status": "PASS",
+    "duplicate_sources": false,
+    "all_source_files": [
+      "11408_信用卡重要資訊揭露.xlsx"
+    ],
+    "selected_source_file": "11408_信用卡重要資訊揭露.xlsx",
+    "dedup_reason": null,
+    "correction_markers": []
+  },
+  {
+    "period": "2025-09",
+    "source_file": "11409_信用卡重要資訊揭露.xlsx",
+    "source_sha256": "ad2a80da785847298b5917e43027f34c7764d4c4ce388cee9d8e420897a4dfda",
+    "sheet_name": "揭露.",
+    "source_unit": "單位：新臺幣千元，張",
+    "issuer_count": 32,
+    "bank_count": 30,
+    "non_bank_issuer_count": 2,
+    "source_url": null,
+    "validation_status": "PASS",
+    "duplicate_sources": false,
+    "all_source_files": [
+      "11409_信用卡重要資訊揭露.xlsx"
+    ],
+    "selected_source_file": "11409_信用卡重要資訊揭露.xlsx",
+    "dedup_reason": null,
+    "correction_markers": []
+  },
+  {
+    "period": "2025-10",
+    "source_file": "11410_信用卡重要資訊揭露.xlsx",
+    "source_sha256": "4a0ef80a86b4f83f96869ea8395f7a17af1d89ed7bb685833bad7a74fc38f875",
+    "sheet_name": "揭露.",
+    "source_unit": "單位：新臺幣千元，張",
+    "issuer_count": 32,
+    "bank_count": 30,
+    "non_bank_issuer_count": 2,
+    "source_url": null,
+    "validation_status": "PASS",
+    "duplicate_sources": false,
+    "all_source_files": [
+      "11410_信用卡重要資訊揭露.xlsx"
+    ],
+    "selected_source_file": "11410_信用卡重要資訊揭露.xlsx",
+    "dedup_reason": null,
+    "correction_markers": []
+  },
+  {
+    "period": "2025-11",
+    "source_file": "11411_信用卡重要資訊揭露.xlsx",
+    "source_sha256": "596f4eac5a8816f6017cd2b281704cc9252885bd62747fe7903e270028e3c11d",
+    "sheet_name": "揭露.",
+    "source_unit": "單位：新臺幣千元，張",
+    "issuer_count": 32,
+    "bank_count": 30,
+    "non_bank_issuer_count": 2,
+    "source_url": null,
+    "validation_status": "PASS",
+    "duplicate_sources": false,
+    "all_source_files": [
+      "11411_信用卡重要資訊揭露.xlsx"
+    ],
+    "selected_source_file": "11411_信用卡重要資訊揭露.xlsx",
+    "dedup_reason": null,
+    "correction_markers": []
+  },
+  {
+    "period": "2025-12",
+    "source_file": "11412_信用卡重要資訊揭露.xlsx",
+    "source_sha256": "47d3e626934d2a58fdc69b75f2d3deb5feaa9de2e02519cc223691478699f216",
+    "sheet_name": "揭露.",
+    "source_unit": "單位：新臺幣千元，張",
+    "issuer_count": 32,
+    "bank_count": 30,
+    "non_bank_issuer_count": 2,
+    "source_url": null,
+    "validation_status": "PASS",
+    "duplicate_sources": false,
+    "all_source_files": [
+      "11412_信用卡重要資訊揭露.xlsx"
+    ],
+    "selected_source_file": "11412_信用卡重要資訊揭露.xlsx",
+    "dedup_reason": null,
+    "correction_markers": []
+  },
+  {
+    "period": "2026-01",
+    "source_file": "11501_信用卡重要資訊揭露.xlsx",
+    "source_sha256": "1cdad173d9ca5fd69acfcbfabc2cda0950969b1e17fa92684445950e04025b3d",
+    "sheet_name": "揭露.",
+    "source_unit": "單位：新臺幣千元，張",
+    "issuer_count": 32,
+    "bank_count": 30,
+    "non_bank_issuer_count": 2,
+    "source_url": null,
+    "validation_status": "PASS",
+    "duplicate_sources": false,
+    "all_source_files": [
+      "11501_信用卡重要資訊揭露.xlsx"
+    ],
+    "selected_source_file": "11501_信用卡重要資訊揭露.xlsx",
+    "dedup_reason": null,
+    "correction_markers": []
+  },
+  {
+    "period": "2026-02",
+    "source_file": "11502_信用卡重要資訊揭露.xlsx",
+    "source_sha256": "4b33f9b37e516fbf93d20ed7b452c79fad50460ca3b8e68278ed1a3a6a66bb24",
+    "sheet_name": "揭露.",
+    "source_unit": "單位：新臺幣千元，張",
+    "issuer_count": 32,
+    "bank_count": 30,
+    "non_bank_issuer_count": 2,
+    "source_url": null,
+    "validation_status": "PASS",
+    "duplicate_sources": false,
+    "all_source_files": [
+      "11502_信用卡重要資訊揭露.xlsx"
+    ],
+    "selected_source_file": "11502_信用卡重要資訊揭露.xlsx",
+    "dedup_reason": null,
+    "correction_markers": []
+  },
+  {
+    "period": "2026-03",
+    "source_file": "11503_信用卡重要資訊揭露.xlsx",
+    "source_sha256": "194afe9c255ceaf764c3e968ac43b355f9a62f29903187e8c80b329c120866ba",
+    "sheet_name": "揭露.",
+    "source_unit": "單位：新臺幣千元，張",
+    "issuer_count": 32,
+    "bank_count": 30,
+    "non_bank_issuer_count": 2,
+    "source_url": null,
+    "validation_status": "PASS",
+    "duplicate_sources": false,
+    "all_source_files": [
+      "11503_信用卡重要資訊揭露.xlsx"
+    ],
+    "selected_source_file": "11503_信用卡重要資訊揭露.xlsx",
+    "dedup_reason": null,
+    "correction_markers": []
+  },
+  {
+    "period": "2026-04",
+    "source_file": "11504_信用卡重要資訊揭露.xlsx",
+    "source_sha256": "7a07105e45f85dbf13b27e52007d35778dd9e2b9fa21621875291c318595b9e1",
+    "sheet_name": "揭露.",
+    "source_unit": "單位：新臺幣千元，張",
+    "issuer_count": 32,
+    "bank_count": 30,
+    "non_bank_issuer_count": 2,
+    "source_url": null,
+    "validation_status": "PASS",
+    "duplicate_sources": false,
+    "all_source_files": [
+      "11504_信用卡重要資訊揭露.xlsx"
+    ],
+    "selected_source_file": "11504_信用卡重要資訊揭露.xlsx",
+    "dedup_reason": null,
+    "correction_markers": []
+  },
+  {
+    "period": "2026-05",
+    "source_file": "11505_信用卡重要資訊揭露.xlsx",
+    "source_sha256": "8a065b6eeef66eb17af152774e710670371f20faf4e3e9eabe498ea8ce39084d",
+    "sheet_name": "揭露.",
+    "source_unit": "單位：新臺幣千元，張",
+    "issuer_count": 32,
+    "bank_count": 30,
+    "non_bank_issuer_count": 2,
+    "source_url": null,
+    "validation_status": "PASS",
+    "duplicate_sources": false,
+    "all_source_files": [
+      "11505_信用卡重要資訊揭露.xlsx"
+    ],
+    "selected_source_file": "11505_信用卡重要資訊揭露.xlsx",
+    "dedup_reason": null,
+    "correction_markers": []
+  },
+  {
+    "period": "2026-06",
+    "source_file": "11506_信用卡重要資訊揭露.xlsx",
+    "source_sha256": "fff15f2f0dddf329eba2faccf4f564fb261a55d7270cff844a645df5fd30393c",
+    "sheet_name": "揭露.",
+    "source_unit": "單位：新臺幣千元，張",
+    "issuer_count": 32,
+    "bank_count": 30,
+    "non_bank_issuer_count": 2,
+    "source_url": null,
+    "validation_status": "PASS",
+    "duplicate_sources": false,
+    "all_source_files": [
+      "11506_信用卡重要資訊揭露.xlsx"
+    ],
+    "selected_source_file": "11506_信用卡重要資訊揭露.xlsx",
+    "dedup_reason": null,
+    "correction_markers": []
+  },
+  {
+    "period": "2026-07",
+    "source_file": "11507_信用卡重要資訊揭露.xlsx",
+    "source_sha256": "d7a3295cfce3ccba09acf769ee76a3c2fd49898ce1524f893a3f68c622919d9b",
+    "sheet_name": "揭露.",
+    "source_unit": "單位：新臺幣千元，張",
+    "issuer_count": 32,
+    "bank_count": 30,
+    "non_bank_issuer_count": 2,
+    "source_url": null,
+    "validation_status": "PASS",
+    "duplicate_sources": true,
+    "all_source_files": [
+      "11507_信用卡重要資訊揭露.xlsx",
+      "附表5_115年7月信用卡重要資訊揭露.xlsx"
+    ],
+    "selected_source_file": "11507_信用卡重要資訊揭露.xlsx",
+    "dedup_reason": "SHA-256 相同，優先採用「5碼民國年月＋底線」命名檔案",
+    "correction_markers": []
+  },
+  {
+    "period": "2026-08",
+    "source_file": "11508_信用卡重要資訊揭露.xlsx",
+    "source_sha256": "82094fa34763d678c76190fb958f17f18988935dd7ae9ef73b7cd4418ed50e75",
+    "sheet_name": "揭露.",
+    "source_unit": "單位：新臺幣千元，張",
+    "issuer_count": 32,
+    "bank_count": 30,
+    "non_bank_issuer_count": 2,
+    "source_url": null,
+    "validation_status": "PASS",
+    "duplicate_sources": false,
+    "all_source_files": [
+      "11508_信用卡重要資訊揭露.xlsx"
+    ],
+    "selected_source_file": "11508_信用卡重要資訊揭露.xlsx",
+    "dedup_reason": null,
+    "correction_markers": []
+  }
+]

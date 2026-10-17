@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="信用卡市場分析圖示">
+  <rect x="1" y="7" width="30" height="18" rx="4" fill="#173458"/>
+  <rect x="3.2" y="9.2" width="25.6" height="13.6" rx="2.6" fill="none" stroke="#FFFFFF" stroke-width="2.2"/>
+  <rect x="4.3" y="10.9" width="23.4" height="2.6" fill="#FFFFFF"/>
+  <rect x="15.8" y="17.7" width="2.6" height="3.2" rx="0.65" fill="#E07B1A"/>
+  <rect x="19.8" y="15.9" width="2.6" height="5" rx="0.65" fill="#E07B1A"/>
+  <rect x="23.8" y="14.1" width="2.6" height="6.8" rx="0.65" fill="#E07B1A"/>
+</svg>
