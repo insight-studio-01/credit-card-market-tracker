@@ -139,7 +139,8 @@
 
     <h3 class="subhead subhead--sm">單月、YTD與月底值定義</h3>
     <ul class="methodology-list">
-      <li>流量型指標（發卡數、簽帳金額、簽帳金額＋預借現金、流通卡每卡簽帳金額）同時提供單月與年初至今（YTD）數據方式；YTD為當年度1月至所選月份加總，每年1月重新起算。</li>
+      <li>流量型指標（發卡數、簽帳金額、簽帳金額＋預借現金）同時提供單月與年初至今（YTD）數據方式；YTD為當年度1月至所選月份加總，每年1月重新起算。</li>
+      <li>流通卡每卡簽帳金額同樣提供單月與YTD兩種數據方式，但YTD並非各月每卡金額加總：YTD每卡金額＝YTD簽帳金額（元）÷所選月流通卡數；單月每卡金額＝當月簽帳金額（元）÷當月流通卡數。</li>
       <li>存量型指標（流通卡數、有效卡數、有效卡率）為月底時點值，不計算YTD累計。</li>
       <li>信用卡應收帳款（原「總資產」欄位，已更名避免誤解）＝循環信用餘額＋未到期分期付款餘額，為月底時點值，不做YTD加總；此數字僅為信用卡應收帳款規模，並非遠銀整體資產負債表之總資產，不可混用。</li>
     </ul>
@@ -159,7 +160,7 @@
       <li>有效卡率 ＝ 有效卡數 ÷ 流通卡數 × 100%；為比率型指標，僅提供排名，不提供市占率（比率無法計算市占率）。</li>
       <li>市占率 ＝ 機構數值 ÷ 市場合計數值 × 100%（市場數值優先採官方合計列，並與32家明細加總交叉驗證）；僅適用於可加總之金額型指標。</li>
       <li>簽帳金額＋預借現金 ＝ 當月（或YTD）簽帳金額 ＋ 當月（或YTD）預借現金金額</li>
-      <li>流通卡每卡簽帳金額 ＝ 簽帳金額（元）÷ 當月流通卡數；單月與YTD皆僅提供排名，不提供市占率（每卡平均無法計算市占率）。</li>
+      <li>流通卡每卡簽帳金額 ＝ 簽帳金額（元，依所選單月或YTD）÷ 當月流通卡數；YTD模式為YTD簽帳金額÷所選月流通卡數，並非各月每卡金額加總。單月與YTD皆僅提供排名，不提供市占率（每卡平均無法計算市占率）。</li>
       <li>信用卡應收帳款 ＝ 循環信用餘額 ＋ 未到期分期付款餘額；為可加總之金額型指標，提供市占率與排名。</li>
       <li>金額原始單位為新臺幣千元，頁面以億元或元／張呈現；完整公式詳見 <code>docs/calculation-rules.md</code>。</li>
     </ul>
@@ -253,7 +254,7 @@
         <button type="button" class="scope-btn is-active" data-scope="top12" aria-pressed="true">流通卡前12大銀行</button>
         <button type="button" class="scope-btn" data-scope="all" aria-pressed="false">全部發卡機構</button>
       </div>
-      <span class="scope-note">排名於所選範圍內計算；市占率以整體市場計算。</span>
+      <span class="scope-note">排名為所選指標在全母體（全30家銀行或當月全部發卡機構）中的排名，不因篩選、搜尋或排序而改變；市占率以整體市場計算。</span>
     </div>
 
     <div class="panel">
@@ -266,6 +267,7 @@
     <div class="panel" id="peers-table-wrap">
       <h2 id="peers-table-title">流通卡前12大銀行｜同業比較</h2>
       <p class="peers-condition" id="peers-table-caption"></p>
+      <p class="peers-scope-explain" id="peers-table-note"></p>
       <p class="peers-market-line" id="peers-market-line"></p>
       <div class="peers-toolbar">
         <div class="peers-search-wrap">
@@ -286,12 +288,12 @@
       <summary>資料來源與計算說明</summary>
       <div class="methodology-content">
         <ul class="methodology-list">
-          <li>流通卡前12大銀行名單：依所選資料月份月底流通卡數，從銀行中選出前12大；名單不隨指標或單月／YTD切換而改變。遠銀入選時標示「本行」，未入選時不額外加入第13家。</li>
-          <li>流通卡前12大銀行模式下，「所選指標排名」「距前一名」「領先後一名」皆於這12家銀行內重新計算（標準競賽排名：並列名次相同、下一名次依序遞補），不等同全部30家銀行的既有排名；表格中的「流通卡數排名」欄僅標示名單選取依據（全30家母體），與所選指標排名為不同口徑，不可混用。</li>
-          <li>全部發卡機構模式使用當月完整發卡機構名單（銀行與非銀行，家數依資料而定）；發卡機構排名沿用既有全量排名欄位。切換範圍、搜尋與排序只改變顯示列，不改變排名、市占率分母或同業排名母體。</li>
+          <li>流通卡前12大銀行名單：依所選資料月份月底流通卡數，從銀行中選出前12大，僅作為表格顯示列之篩選條件；名單不隨指標、單月／YTD或排序切換而改變。遠銀入選時標示「本行」，未入選時不額外加入第13家。</li>
+          <li>表內排名一律採全母體既有排名欄位：流通卡前12大銀行模式下為「所選指標」於全部30家銀行中之排名；全部發卡機構模式下為當月全部發卡機構中之排名。兩種模式皆不因篩選顯示列、搜尋或排序而重新計算，與「遠銀排名與同業差距」區塊口徑一致。</li>
+          <li>全部發卡機構模式使用當月完整發卡機構名單（銀行與非銀行，家數依資料而定）；切換範圍、搜尋與排序只改變顯示列，不改變排名、市占率分母或排名母體。</li>
           <li>市占率分母為整體市場定義（市場合計數值），不是比較範圍內的加總；有效卡率與每卡簽帳金額不適用市占率，該欄顯示「不適用」。</li>
-          <li>同期排名比較：當月指標與去年同月排名比較；YTD指標與去年同期（相同累計數據方式）排名比較。流通卡前12大模式下，本期與去年同期分別使用各自當期的前12大名單；遠銀任一期未入選時，明確顯示「不適用」，不強算名次變化。</li>
-          <li>與遠銀差額＝同業所選指標值－遠銀所選指標值。正值表示同業數值高於遠銀，負值表示低於遠銀；差額為數值比較，不代表經營優劣。單位：金額為億元、卡數為張、每卡金額為元／張、有效卡率為pp。</li>
+          <li>同期排名比較：當月指標與去年同月排名比較；YTD指標與去年同期（相同累計數據方式）排名比較，皆採全母體排名；遠銀缺排名資料時，明確顯示「不適用」，不強算名次變化。</li>
+          <li>「遠銀排名與同業差距」區塊之距前一名／領先後一名，為遠銀於全母體排名中實際相鄰之同業（不限於表格目前顯示之12家銀行）。與遠銀差額＝同業所選指標值－遠銀所選指標值。正值表示同業數值高於遠銀，負值表示低於遠銀；差額為數值比較，不代表經營優劣。單位：金額為億元、卡數為張、每卡金額為元／張、有效卡率為pp。</li>
           <li>距前一名＝前一名數值－遠銀數值；領先後一名＝遠銀數值－後一名數值。兩者僅為目前數值差距，不推論未來排名變化。</li>
         </ul>
       </div>
@@ -309,173 +311,180 @@
     </div>
 
     <div id="custom-bank-mode">
-      <div class="panel custom-controls" id="bank-controls">
-        <div class="filter-grid filter-row-1">
-          <div class="filter-field filter-field-bank">
-            <label class="ctl-label" for="bank-combo">銀行</label>
-            <div class="filter-control-row">
-              <input type="text" id="bank-combo" class="ctl-input filter-control" list="bank-datalist" placeholder="輸入或選擇銀行名稱" autocomplete="off">
-              <datalist id="bank-datalist"></datalist>
-              <button type="button" class="ghost-btn filter-control" id="bank-switch-fe">切換遠銀</button>
+      <div class="panel custom-controls ops-shared-panel" id="bank-controls">
+        <div class="ops-shared-row">
+          <div class="ops-inline-field ops-bank-field">
+            <span class="ops-inline-label" id="bank-picker-label">選擇銀行</span>
+            <button type="button" class="ctl-select filter-control ops-bank-trigger" id="bank-picker-trigger" aria-expanded="false" aria-haspopup="true" aria-labelledby="bank-picker-label">
+              <span id="bank-picker-trigger-text">遠東商銀</span>
+            </button>
+            <div class="cmp-bank-popover" id="bank-picker-popover" hidden>
+              <div class="cmp-bank-popover-head">
+                <input type="search" id="bank-picker-search" class="ctl-input filter-control" placeholder="搜尋銀行" aria-label="搜尋銀行">
+                <div class="cmp-quick">
+                  <button type="button" class="ghost-btn" id="bank-picker-fe">切換遠銀</button>
+                </div>
+              </div>
+              <div class="cmp-list" id="bank-picker-list" role="group" aria-label="銀行清單"></div>
             </div>
           </div>
-          <div class="filter-field filter-field-basis">
-            <span class="ctl-label" id="bank-basis-label">數據方式</span>
+          <div class="ops-row-divider" aria-hidden="true"></div>
+          <div class="ops-inline-field">
+            <span class="ops-inline-label" id="bank-basis-label">資料口徑</span>
             <div class="seg filter-control" role="group" aria-labelledby="bank-basis-label">
               <button type="button" class="seg-btn" data-bank-basis="month" aria-pressed="false">單月</button>
-              <button type="button" class="seg-btn" data-bank-basis="ytd" aria-pressed="true">年初至今（YTD）</button>
+              <button type="button" class="seg-btn" data-bank-basis="ytd" aria-pressed="true">YTD</button>
             </div>
           </div>
         </div>
 
-        <div class="filter-grid filter-row-2">
-          <div class="filter-field filter-field-range">
-            <span class="ctl-label" id="bank-range-label">趨勢期間</span>
+        <div class="ops-shared-row">
+          <div class="ops-inline-field">
+            <span class="ops-inline-label" id="bank-range-label">趨勢期間</span>
             <div class="seg filter-control" role="group" aria-labelledby="bank-range-label">
               <button type="button" class="seg-btn" data-bank-range="6" aria-pressed="false">近6個月</button>
               <button type="button" class="seg-btn" data-bank-range="12" aria-pressed="false">近12個月</button>
-              <button type="button" class="seg-btn" data-bank-range="custom" aria-pressed="false">自訂期間</button>
+              <button type="button" class="seg-btn" data-bank-range="custom" aria-pressed="false">自訂</button>
             </div>
           </div>
-          <div class="filter-field filter-field-note">
-            <span class="ctl-label">分析期間</span>
-            <p class="filter-note" id="bank-range-note"></p>
+          <div class="ops-row-divider" aria-hidden="true"></div>
+          <div class="ops-inline-field ops-period-readout">
+            <span class="ops-calendar-icon" aria-hidden="true">&#128197;</span>
+            <span class="filter-note" id="bank-range-note"></span>
+            <div class="ops-custom-range" id="bank-custom-wrap" hidden>
+              <select id="bank-custom-start" class="ctl-select filter-control" aria-label="開始月份"></select>
+              <span class="ops-range-sep" aria-hidden="true">–</span>
+              <select id="bank-custom-end" class="ctl-select filter-control" aria-label="結束月份"></select>
+            </div>
           </div>
         </div>
-
-        <div class="custom-range-row" id="bank-custom-wrap" hidden>
-          <div class="filter-field">
-            <label class="ctl-label" for="bank-custom-start">開始月份</label>
-            <select id="bank-custom-start" class="ctl-select filter-control"></select>
-          </div>
-          <div class="filter-field">
-            <label class="ctl-label" for="bank-custom-end">結束月份</label>
-            <select id="bank-custom-end" class="ctl-select filter-control"></select>
-          </div>
-          <p class="filter-note custom-range-msg" id="bank-custom-msg" aria-live="polite"></p>
-        </div>
+        <p class="filter-note custom-range-msg" id="bank-custom-msg" aria-live="polite"></p>
       </div>
 
       <div class="panel" id="bank-print-area">
-        <div class="bank-title-row">
-          <div>
-            <h2 class="bank-title" id="bank-title"></h2>
-            <p class="bank-meta" id="bank-meta"></p>
+        <div class="bank-title-row cmp-right-head">
+          <div class="cmp-title-wrap">
+            <h2 class="bank-title cmp-chart-title" id="bank-title"></h2>
           </div>
-          <div class="bank-actions">
-            <button type="button" class="primary-btn" id="bank-print-btn">列印／另存PDF</button>
-            <button type="button" class="ghost-btn" id="bank-csv-btn">下載數據 CSV</button>
+          <div class="bank-actions cmp-actions">
+            <button type="button" class="ghost-btn" id="bank-csv-btn">⭳ CSV</button>
+            <button type="button" class="primary-btn" id="bank-print-btn">列印／PDF</button>
           </div>
         </div>
+        <p class="bank-meta cmp-notes-line" id="bank-meta"></p>
         <div class="bank-cards" id="bank-cards"></div>
         <p class="scope-note">資料來源：金管會銀行局信用卡業務統計附表五。流通卡數、有效卡數、有效卡率與應收帳款為當月（月底）值；發卡數與簽帳金額依所選單月或年初至今數據方式呈現；流通卡每卡簽帳金額依既有公式計算。</p>
       </div>
     </div>
 
     <div id="custom-compare-mode" hidden>
-      <div class="cmp-layout">
-        <aside class="panel cmp-left">
-          <h3 class="cmp-h">設定比較條件</h3>
-
-          <div class="filter-field">
-            <div class="cmp-field-head">
-              <span class="ctl-label">比較對象</span>
+      <div class="panel cmp-filters ops-shared-panel">
+        <div class="ops-shared-row">
+          <div class="ops-inline-field ops-bank-field">
+            <span class="ops-inline-label" id="cmp-bank-label">選擇銀行</span>
+            <div class="ops-bank-trigger-col">
+              <button type="button" class="ctl-select filter-control ops-bank-trigger" id="cmp-bank-trigger" aria-expanded="false" aria-haspopup="true" aria-labelledby="cmp-bank-label">
+                <span id="cmp-bank-trigger-text">請選擇銀行</span>
+              </button>
               <span class="cmp-count" id="cmp-count"></span>
             </div>
-            <label class="cmp-market-row">
-              <input type="checkbox" id="cmp-market-total">
-              <span class="cmp-market-swatch"></span>
-              <span>整體市場（總計）</span>
-            </label>
-            <input type="search" id="cmp-search" class="ctl-input filter-control" placeholder="搜尋銀行（不會清除已選）" aria-label="搜尋銀行">
-            <div class="cmp-quick">
-              <button type="button" class="ghost-btn" id="cmp-top12">流通卡前12大</button>
-              <button type="button" class="ghost-btn" id="cmp-clear">清除選取</button>
+            <div class="cmp-bank-popover" id="cmp-bank-popover" hidden>
+              <div class="cmp-bank-popover-head">
+                <label class="cmp-market-row">
+                  <input type="checkbox" id="cmp-market-total">
+                  <span class="cmp-market-swatch"></span>
+                  <span>整體市場（總計）</span>
+                </label>
+                <input type="search" id="cmp-search" class="ctl-input filter-control" placeholder="搜尋銀行（不會清除已選）" aria-label="搜尋銀行">
+                <div class="cmp-quick">
+                  <button type="button" class="ghost-btn" id="cmp-top12">流通卡前12大</button>
+                  <button type="button" class="ghost-btn" id="cmp-clear">清除選取</button>
+                </div>
+                <p class="filter-note" id="cmp-ref-note"></p>
+                <p class="cmp-limit" id="cmp-limit-msg" hidden></p>
+              </div>
+              <div class="cmp-list" id="cmp-list" role="group" aria-label="銀行清單"></div>
             </div>
-            <p class="filter-note" id="cmp-ref-note"></p>
-            <div class="cmp-list" id="cmp-list" role="group" aria-label="銀行清單"></div>
-            <div class="cmp-chips" id="cmp-chips"></div>
-            <p class="cmp-limit" id="cmp-limit-msg" hidden></p>
-            <p class="cmp-empty" id="cmp-empty">請至少選擇 1 家銀行或整體市場（總計），選取後即可製圖與下載。</p>
+            <p class="cmp-empty" id="cmp-empty">請至少選擇 1 家銀行或整體市場（總計），選取後即可顯示圖表與下載。</p>
           </div>
+          <div class="ops-row-divider" aria-hidden="true"></div>
+          <div class="ops-inline-field" id="cmp-basis-wrap">
+            <span class="ops-inline-label" id="cmp-basis-label">資料口徑</span>
+            <div class="seg filter-control" id="cmp-basis-seg" role="group" aria-labelledby="cmp-basis-label">
+              <button type="button" class="seg-btn" data-cmp-basis="month" aria-pressed="false">單月</button>
+              <button type="button" class="seg-btn" data-cmp-basis="ytd" aria-pressed="false">YTD</button>
+            </div>
+            <p class="filter-note ops-basis-static" id="cmp-basis-static" hidden></p>
+          </div>
+        </div>
 
+        <div class="ops-shared-row" id="cmp-time-row">
+          <div class="ops-inline-field" id="cmp-range-wrap">
+            <span class="ops-inline-label" id="cmp-range-label">趨勢期間</span>
+            <div class="seg filter-control" role="group" aria-labelledby="cmp-range-label">
+              <button type="button" class="seg-btn" data-cmp-range="6" aria-pressed="false">近6個月</button>
+              <button type="button" class="seg-btn" data-cmp-range="12" aria-pressed="false">近12個月</button>
+              <button type="button" class="seg-btn" data-cmp-range="custom" aria-pressed="false">自訂</button>
+            </div>
+          </div>
+          <div class="ops-row-divider" aria-hidden="true"></div>
+          <div class="ops-inline-field ops-period-readout">
+            <span class="ops-calendar-icon" aria-hidden="true">&#128197;</span>
+            <span class="filter-note" id="cmp-range-note"></span>
+            <div class="ops-custom-range" id="cmp-custom-wrap" hidden>
+              <select id="cmp-custom-start" class="ctl-select filter-control" aria-label="開始月份"></select>
+              <span class="ops-range-sep" aria-hidden="true">–</span>
+              <select id="cmp-custom-end" class="ctl-select filter-control" aria-label="結束月份"></select>
+            </div>
+          </div>
+        </div>
+        <p class="filter-note custom-range-msg" id="cmp-custom-msg" aria-live="polite"></p>
+      </div>
+
+      <section class="panel cmp-right" aria-label="圖表預覽">
+        <div class="cmp-right-head">
+          <div class="cmp-title-wrap">
+            <h3 class="cmp-chart-title" id="cmp-title-text"></h3>
+            <button type="button" class="ghost-btn cmp-title-edit-btn" id="cmp-title-edit-btn">✎ 編輯標題</button>
+          </div>
+          <div class="cmp-actions">
+            <button type="button" class="ghost-btn" id="cmp-csv" disabled>⭳ CSV</button>
+            <button type="button" class="primary-btn" id="cmp-png" disabled>PNG（16:9）</button>
+          </div>
+        </div>
+        <div class="cmp-title-edit-row" id="cmp-title-edit-row" hidden>
+          <input type="text" id="cmp-title-input" class="ctl-input" aria-label="圖表標題">
+          <button type="button" class="ghost-btn" id="cmp-title-reset-btn">還原自動標題</button>
+        </div>
+
+        <div class="cmp-content-toolbar">
+          <div class="filter-field">
+            <span class="ctl-label" id="cmp-analysis-label">比較方式</span>
+            <div class="seg filter-control" role="group" aria-labelledby="cmp-analysis-label">
+              <button type="button" class="seg-btn" data-cmp-analysis="trend" aria-pressed="false">歷月趨勢</button>
+              <button type="button" class="seg-btn" data-cmp-analysis="month" aria-pressed="false">單一月份比較</button>
+            </div>
+          </div>
           <div class="filter-field">
             <label class="ctl-label" for="cmp-metric">指標</label>
             <select id="cmp-metric" class="ctl-select filter-control"></select>
           </div>
-
-          <div class="filter-field" id="cmp-basis-wrap">
-            <span class="ctl-label" id="cmp-basis-label">數據方式</span>
-            <div class="seg filter-control" role="group" aria-labelledby="cmp-basis-label">
-              <button type="button" class="seg-btn" data-cmp-basis="month" aria-pressed="false">單月</button>
-              <button type="button" class="seg-btn" data-cmp-basis="ytd" aria-pressed="false">年初至今（YTD）</button>
-            </div>
-          </div>
-
           <div class="filter-field">
-            <span class="ctl-label" id="cmp-analysis-label">分析方式</span>
-            <div class="seg filter-control" role="group" aria-labelledby="cmp-analysis-label">
-              <button type="button" class="seg-btn" data-cmp-analysis="month" aria-pressed="false">月份比較</button>
-              <button type="button" class="seg-btn" data-cmp-analysis="trend" aria-pressed="false">期間趨勢</button>
-            </div>
+            <label class="ctl-label" for="cmp-display-select">顯示</label>
+            <select id="cmp-display-select" class="ctl-select filter-control"></select>
           </div>
+        </div>
 
-          <div class="filter-field">
-            <span class="ctl-label" id="cmp-display-label">顯示數據</span>
-            <div class="seg filter-control" role="group" aria-labelledby="cmp-display-label">
-              <button type="button" class="seg-btn" data-cmp-display="value" aria-pressed="false">本期值</button>
-              <button type="button" class="seg-btn" data-cmp-display="yoy" aria-pressed="false">同期變化</button>
-            </div>
-          </div>
-
-          <div class="filter-field" id="cmp-month-wrap">
-            <span class="ctl-label">資料月份</span>
-            <p class="filter-note" id="cmp-month-note"></p>
-          </div>
-
-          <div class="filter-field" id="cmp-range-wrap">
-            <span class="ctl-label" id="cmp-range-label">趨勢期間</span>
-            <div class="seg filter-control" role="group" aria-labelledby="cmp-range-label">
-              <button type="button" class="seg-btn" data-cmp-range="6" aria-pressed="false">近6個月</button>
-              <button type="button" class="seg-btn" data-cmp-range="12" aria-pressed="false">近12個月</button>
-              <button type="button" class="seg-btn" data-cmp-range="custom" aria-pressed="false">自訂期間</button>
-            </div>
-            <p class="filter-note" id="cmp-range-note"></p>
-            <div class="custom-range-row" id="cmp-custom-wrap" hidden>
-              <div class="filter-field">
-                <label class="ctl-label" for="cmp-custom-start">開始月份</label>
-                <select id="cmp-custom-start" class="ctl-select filter-control"></select>
-              </div>
-              <div class="filter-field">
-                <label class="ctl-label" for="cmp-custom-end">結束月份</label>
-                <select id="cmp-custom-end" class="ctl-select filter-control"></select>
-              </div>
-              <p class="filter-note custom-range-msg" id="cmp-custom-msg" aria-live="polite"></p>
-            </div>
-          </div>
-
-          <button type="button" class="primary-btn cmp-update" id="cmp-update">更新圖表</button>
-          <p class="cmp-dirty" id="cmp-dirty" hidden>條件已變更，圖表尚未更新；請按「更新圖表」後再下載，避免下載到舊圖。</p>
-        </aside>
-
-        <section class="panel cmp-right" aria-label="圖表預覽">
-          <div class="cmp-right-head">
-            <h3 class="cmp-h">圖表預覽</h3>
-            <div class="cmp-actions">
-              <button type="button" class="ghost-btn" id="cmp-csv" disabled>下載數據 CSV</button>
-              <button type="button" class="primary-btn" id="cmp-png" disabled>下載圖片 PNG（16:9）</button>
-            </div>
-          </div>
-          <label class="cmp-title-label">圖表標題（可修改）
-            <input type="text" id="cmp-title-input" class="ctl-input" aria-label="圖表標題">
-          </label>
-          <h3 class="cmp-chart-title" id="cmp-title-text"></h3>
-          <div class="cmp-notes" id="cmp-notes"></div>
-          <div class="cmp-legend" id="cmp-legend"></div>
-          <div class="cmp-chart" id="cmp-chart"></div>
+        <p class="cmp-notes-line" id="cmp-subtitle"></p>
+        <p class="cmp-notes-line cmp-period-note" id="cmp-period-note" hidden></p>
+        <div class="cmp-legend" id="cmp-legend"></div>
+        <div class="cmp-chart" id="cmp-chart"></div>
+        <details class="cmp-table-details">
+          <summary>查看數據與排名</summary>
           <div class="table-scroll cmp-table-wrap" id="cmp-table-wrap"></div>
-        </section>
-      </div>
+        </details>
+        <p class="scope-note" id="cmp-source-note">資料來源：金管會銀行局信用卡業務統計附表五</p>
+      </section>
     </div>
   </section>
 

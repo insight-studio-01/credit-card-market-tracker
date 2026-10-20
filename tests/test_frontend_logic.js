@@ -406,23 +406,25 @@ test("資料明細數值欄不重複單位（單位統一放欄名）", function
   assert.ok(txt.indexOf("44,543") >= 0 || txt.indexOf("44543") >= 0, txt);
 });
 
-test("同業比較：全部發卡機構模式不含銀行排名欄；前12大模式選流通卡數時只保留一個排名欄", function () {
+test("同業比較：不論範圍或指標，表格一律只有單一排名欄，欄名隨指標更新（全母體排名，不因篩選列重新計算）", function () {
   const labels = (scope, key) => app.peerColumns(scope, app.METRIC_CATALOG[key]).map(function (c) { return c.label; });
   const all = labels("all", "cards_in_force");
-  assert.ok(all.some(function (l) { return l.indexOf("發卡機構排名") >= 0; }), all.join("|"));
-  assert.strictEqual(all.filter(function (l) { return l.indexOf("銀行排名") >= 0; }).length, 0, all.join("|"));
+  assert.strictEqual(all.filter(function (l) { return l.indexOf("排名") >= 0; }).length, 1, all.join("|"));
+  assert.ok(all.indexOf("流通卡數排名") >= 0, all.join("|"));
   const topCards = labels("top12", "cards_in_force");
   assert.strictEqual(topCards.filter(function (l) { return l.indexOf("排名") >= 0; }).length, 1, topCards.join("|"));
+  assert.ok(topCards.indexOf("流通卡數排名") >= 0, topCards.join("|"));
   const topActive = labels("top12", "active_cards");
-  assert.strictEqual(topActive.filter(function (l) { return l.indexOf("排名") >= 0; }).length, 2, topActive.join("|"));
+  assert.strictEqual(topActive.filter(function (l) { return l.indexOf("排名") >= 0; }).length, 1, topActive.join("|"));
+  assert.ok(topActive.indexOf("有效卡數排名") >= 0, topActive.join("|"));
 });
 
 test("同業比較：切換範圍時新模式不支援的排序欄改回所選指標數值由大至小；支援的欄位保留", function () {
   const m = app.METRIC_CATALOG.purchase_amount;
   assert.deepStrictEqual(app.peerSortFor("all", m, "cardsRank", "asc"), { field: "value", dir: "desc" });
-  assert.deepStrictEqual(app.peerSortFor("all", m, "rank", "asc"), { field: "value", dir: "desc" });
+  assert.deepStrictEqual(app.peerSortFor("all", m, "rank", "asc"), { field: "rank", dir: "asc" });
   assert.deepStrictEqual(app.peerSortFor("top12", m, "rank", "asc"), { field: "rank", dir: "asc" });
-  assert.deepStrictEqual(app.peerSortFor("all", m, "issuerRank", "desc"), { field: "issuerRank", dir: "desc" });
+  assert.deepStrictEqual(app.peerSortFor("all", m, "issuerRank", "desc"), { field: "value", dir: "desc" });
 });
 
 test("同業比較搜尋：機構全名或既有簡稱皆可辨識；空字串不過濾", function () {
@@ -513,15 +515,6 @@ test("同業差額為正負號分明之數值，單位依指標（金額億元�
   assert.strictEqual(app.fmtDistance(amount, null), "—");
 });
 
-test("標準競賽排名（1、2、2、4）：數值由大至小，缺值不納入排名，與 scripts/calculate_metrics.py 同規則", function () {
-  const ranks = app.standardCompetitionRank([
-    { id: "a", value: 100 }, { id: "b", value: 80 }, { id: "c", value: 80 },
-    { id: "d", value: 50 }, { id: "e", value: null },
-  ]);
-  assert.deepStrictEqual(ranks, { a: 1, b: 2, c: 2, d: 4 });
-  assert.strictEqual(Object.prototype.hasOwnProperty.call(ranks, "e"), false);
-});
-
 test("相邻名次：並列銀行一併列出，不任意挑一家（rankVal 為該範圍下的名次，不再永遠是 view.bankRank）", function () {
   const pool = [
     { row: { issuer_name: "A" }, rankVal: 3 },
@@ -566,14 +559,14 @@ test("摘要卡：距前一名＝前一名−遠銀；領先後一名＝遠銀�
   assert.strictEqual(cards[3].sub, "較去年同期");
 });
 
-test("前12大模式：遠鋶未列入當月排行正前12大時，摘要明確說明且不加入第13家", function () {
+test("銀行範圍（top12）排名母體為全30家銀行：缺遠銀排名資料時，摘要明確說明「缺排名資料」", function () {
   const metric = app.METRIC_CATALOG.purchase_amount;
   const pool = [
     { row: { issuer_name: "A" }, view: { raw: 100, raw100m: 1 }, rankVal: 1 },
     { row: { issuer_name: "B" }, view: { raw: 90, raw100m: 0.9 }, rankVal: 2 },
   ];
   const cards = app.buildPeerCards(metric, "top12", pool, null, [], null, "較去年同期");
-  assert.strictEqual(cards[0].value, "未列入當月流通卡前12大銀行");
+  assert.strictEqual(cards[0].value, "缺排名資料");
   assert.strictEqual(cards[1].value, "不適用");
   assert.strictEqual(cards[2].value, "不適用");
   assert.strictEqual(cards[3].value, "不適用");
