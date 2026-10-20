@@ -28,6 +28,10 @@
   // 皆不會出現113年資料點。
   var DISPLAY_START_MONTH = "2025-01";
 
+  // Header「更新日期」：本站資料實際完成更新的日期，隨每次匯入新月份原始資料時手動更新；
+  // 此日期無法由既有資料欄位推算（data/processed 未記錄站內更新時間戳記），故以固定常數維護。
+  var HEADER_UPDATED_AT_LABEL = "2026年10月20日";
+
   // 資料明細預設依發卡機構排名由1至32排列（非銀行發卡機構與銀行一併排序，不得先分組）。
   var DETAIL_DEFAULT_SORT = { field: "issuer_rank", dir: "asc" };
 
@@ -3069,6 +3073,16 @@
     });
   }
 
+  /** Header 右側「最新資料」：取資料集中最新一期（state.periods 已排序），依程式計算取得，不寫死月份。 */
+  function renderHeaderMeta() {
+    var latestPeriod = state.periods[state.periods.length - 1];
+    var mkt = findMarket(latestPeriod);
+    var latestEl = document.getElementById("header-latest-period");
+    if (latestEl) latestEl.textContent = "最新資料　民國" + (mkt ? periodShortLabel(mkt) : "—");
+    var updatedEl = document.getElementById("header-updated-date");
+    if (updatedEl) updatedEl.textContent = "更新日期：" + HEADER_UPDATED_AT_LABEL;
+  }
+
   function renderMeta(period) {
     var m = findMarket(period);
     var metaPeriod = document.getElementById("meta-period");
@@ -4481,6 +4495,7 @@
           return;
         }
 
+        renderHeaderMeta();
         populatePeriodSelect();
         populateCustomRangeSelects();
         populateMetricSelects();

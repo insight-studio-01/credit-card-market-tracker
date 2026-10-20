@@ -117,12 +117,19 @@ code { background: var(--page-plane); padding: 1px 5px; border-radius: 4px; font
 
 /* ---------- Header ---------- */
 
+.top-accent-line { height: 4px; background: var(--color-brand); }
+
 .site-header { background: var(--surface-1); border-bottom: 1px solid var(--border-hairline); }
 
-.header-inner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 20px 7px; }
+.header-inner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; padding: 14px 20px 12px; }
 
 .header-title-group { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
 .header-subtitle { font-size: 0.86rem; color: var(--text-secondary); }
+
+.header-right { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+
+.header-meta { display: flex; flex-direction: column; gap: 2px; text-align: right; }
+.header-meta-line { font-size: 0.84rem; font-weight: 600; color: var(--text-secondary); white-space: nowrap; }
 
 .header-controls { display: flex; align-items: center; gap: 10px; }
 
@@ -133,7 +140,7 @@ code { background: var(--page-plane); padding: 1px 5px; border-radius: 4px; font
 }
 
 .export-btn {
-  font-family: inherit; font-size: 0.86rem; font-weight: 600; padding: 7px 14px;
+  font-family: inherit; font-size: 0.86rem; font-weight: 600; padding: 7px 14px; min-height: 40px;
   border-radius: var(--radius-sm); border: none; background: var(--color-brand); color: #fff; cursor: pointer;
 }
 .export-btn:hover { opacity: 0.9; }
@@ -417,7 +424,7 @@ table { border-collapse: collapse; width: 100%; font-size: var(--fs-table); }
 
 /* ---------- 首頁總覽（v3：五欄、口徑切換、底線連結） ---------- */
 
-.site-header h1 { font-size: 23px; font-weight: 800; }
+.site-header h1 { font-size: 32px; font-weight: 800; }
 .header-subtitle { font-size: 0.92rem; font-weight: 400; }
 .main-tab { font-size: 15px; font-weight: 600; padding: 8px 14px; }
 .main-tab.is-active { background: var(--color-brand-soft); border-bottom-width: 4px; color: var(--color-brand); }
@@ -533,7 +540,11 @@ td.ov-detail-link:focus-visible { outline: 2px solid var(--color-brand); outline
     --chart-height-main: 240px;
     --chart-height-small: 210px;
   }
-  .header-inner { padding: 10px 14px 6px; flex-direction: column; align-items: flex-start; }
+  .site-header h1 { font-size: 22px; }
+  .header-inner { padding: 12px 14px 10px; flex-direction: column; align-items: flex-start; gap: 10px; }
+  .header-right { width: 100%; flex-direction: column; align-items: flex-start; gap: 8px; }
+  .header-meta { text-align: left; }
+  .header-meta-line { font-size: 0.78rem; white-space: normal; }
   .main-tabs { padding: 2px 14px 0; overflow-x: auto; }
   .sticky-bar-inner { padding: 8px 14px; gap: 10px; }
   .range-switch { margin-left: 0; width: 100%; }
