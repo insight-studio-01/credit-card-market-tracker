@@ -435,15 +435,37 @@ test("同業比較搜尋：機構全名或既有簡稱皆可辨識；空字串�
   assert.strictEqual(app.filterPeerRows(rows, "美國運通").length, 1);
 });
 
-test("同業比較差額與同期文字：有效卡率為 pp（含空格），數量金額為 YOY ％，去年同期為0與缺值分開說明", function () {
+test("同業比較範圍：兩個選項固定對應名稱（流通卡前12大銀行／全部發卡機構32家）", function () {
+  assert.strictEqual(app.peerScopeLabel("top12"), "流通卡前12大銀行");
+  assert.strictEqual(app.peerScopeLabel("all"), "全部發卡機構（32家）");
+});
+
+test("標準競賽排名：與 scripts/calculate_metrics.py 之 standard_competition_rank 同一算法（1、2、2、4；缺值不納入排名）", function () {
+  const items = [{ v: 100 }, { v: 80 }, { v: 80 }, { v: null }, { v: 50 }];
+  const ranks = app.standardCompetitionRank(items, function (x) { return x.v; });
+  assert.strictEqual(ranks[0], 1);
+  assert.strictEqual(ranks[1], 2);
+  assert.strictEqual(ranks[2], 2);
+  assert.strictEqual(ranks[3], undefined);
+  assert.strictEqual(ranks[4], 4);
+});
+
+test("同業比較排名母體：流通卡前12大銀行模式下，排名改依12家銀行子集重新計算，不沿用全30家銀行排名", function () {
+  // 模擬：12家子集中原本全30家排名第1、3、5名的銀行，在子集內重新計算應變為第1、2、3名。
+  const subset = [{ raw: 500 }, { raw: 300 }, { raw: 100 }];
+  const ranks = app.standardCompetitionRank(subset, function (v) { return v.raw; });
+  assert.deepStrictEqual(ranks, { 0: 1, 1: 2, 2: 3 });
+});
+
+test("同業比較差額與同期文字：有效卡率為 pp（含空格），數量金額為YoY ％，去年同期為0與缺值分開說明", function () {
   const ratio = app.METRIC_CATALOG.effective_card_rate_pct;
   assert.strictEqual(app.peerGapText(ratio, 0.5), "+0.50 pp");
   assert.strictEqual(app.peerGapText(ratio, -0.69), "−0.69 pp");
   assert.strictEqual(app.peerGapText(ratio, NaN), "—");
   assert.strictEqual(app.peerChangeText({ yoy: 0.5, prevRaw: 1 }, ratio), "較去年同期 +0.50 pp");
   const amt = app.METRIC_CATALOG.purchase_amount;
-  assert.strictEqual(app.peerChangeText({ yoy: -6.89, prevRaw: 5 }, amt), "YOY −6.89%");
-  assert.strictEqual(app.peerChangeText({ yoy: null, prevRaw: 0 }, amt), "去年同期為0，無法計算YOY");
+  assert.strictEqual(app.peerChangeText({ yoy: -6.89, prevRaw: 5 }, amt), "YoY −6.89%");
+  assert.strictEqual(app.peerChangeText({ yoy: null, prevRaw: 0 }, amt), "去年同期為0，無法計算 YoY");
   assert.strictEqual(app.peerChangeText({ yoy: null, prevRaw: 3 }, amt), "缺同期資料");
 });
 
@@ -511,7 +533,7 @@ test("同業差額為正負號分明之數值，單位依指標（金額億元�
   const amount = app.METRIC_CATALOG.purchase_amount;
   assert.strictEqual(app.fmtSignedDisplay(amount, 6194.81), "+6,194.81");
   assert.strictEqual(app.fmtSignedDisplay(amount, -121.86), "-121.86");
-  assert.strictEqual(app.fmtDistance(app.METRIC_CATALOG.effective_card_rate_pct, 0.86), "0.86pp");
+  assert.strictEqual(app.fmtDistance(app.METRIC_CATALOG.effective_card_rate_pct, 0.86), "0.86 pp");
   assert.strictEqual(app.fmtDistance(amount, null), "—");
 });
 
@@ -678,6 +700,11 @@ test("自訂比較：元大商業銀行標題去除「商業」，遠銀為橘�
   assert.strictEqual(app.bankColor("元大商業銀行"), app.bankColor("元大商業銀行"), "同一家銀行顏色需穩定");
 });
 
+test("遠銀正式標題固定顯示「遠東商銀」，不得顯示「遠東國際銀行」", function () {
+  assert.strictEqual(app.bankTitleName("遠東國際商業銀行"), "遠東商銀");
+});
+
+
 test("自訂比較：單位與格式—比率為%（無空格）、卡數為萬張、金額為億元、缺值顯示「—」", function () {
   const ratio = app.METRIC_CATALOG.effective_card_rate_pct, card = app.METRIC_CATALOG.cards_in_force, amt = app.METRIC_CATALOG.purchase_amount;
   assert.strictEqual(app.customUnit(ratio).unit, "%");
@@ -817,7 +844,7 @@ test("趨勢單位：卡數為萬張（圖與座標），發卡數同樣為萬�
 
 test("整合摘要：單句、數字帶符號、遠銀低於市場與市占率下降動態帶入", function () {
   var s = app.diagSummarySentences(-6.89, 0.19, -7.08, -0.17, false, "有效卡數");
-  assert.strictEqual(s, "市場有效卡數YOY+0.19%，遠銀−6.89%，遠銀低於市場7.08 pp；市占率較去年同期下降0.17 pp。");
+  assert.strictEqual(s, "市場有效卡數YoY+0.19%，遠銀−6.89%，遠銀低於市場7.08 pp；市占率較去年同期下降0.17 pp。");
   assert.strictEqual((s.match(/。/g) || []).length, 1);
 });
 
@@ -837,7 +864,7 @@ test("整合摘要：比率型用較去年同期 pp 與當期比率差，不提�
 
 test("整合摘要：YTD 加「累計」；市占率為 0 時寫持平", function () {
   var s = app.diagSummarySentences(2, 1, 1, 0, false, "累計簽帳金額");
-  assert.ok(s.indexOf("市場累計簽帳金額YOY+1.00%") === 0 && s.indexOf("市占率較去年同期持平") > 0, s);
+  assert.ok(s.indexOf("市場累計簽帳金額YoY+1.00%") === 0 && s.indexOf("市占率較去年同期持平") > 0, s);
 });
 
 test("診斷組與排名結果：項目與結果同組、排名結果含當期名次", function () {

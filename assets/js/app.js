@@ -10,7 +10,7 @@
  * 重要判讀原則（本階段修正重點）：
  *   1.「本行自身變化」（遠銀 YoY 本身）與「相對市場表現」（遠銀YoY－市場YoY）
  *      必須分開呈現，不得混為一談：遠銀正成長但落後市場，不得描述為「本行衰退」。
- *   2. 比率型指標（有效卡率等）一律使用 pp（百分點），不得寫成一般百分比成長率。
+ *   2. 比率型指標（有效卡率等）一律使用 pp，不得寫成一般百分比成長率。
  *   3.「遠銀－市場」一律保留正負號，並以「領先／落後／高於／低於市場 X pp」等明確文字呈現。
  *   4. 排名數字越小越好；排名變化＝去年（或比較期）排名－本期排名，正值＝進步。
  */
@@ -411,9 +411,9 @@
 
   function compareModeLabel(metric) {
     if (metric.kind === "unavailable") return "尚無資料來源";
-    if (metric.kind === "ratio") return "比率（pp）";
+    if (metric.kind === "ratio") return "當月比率";
     if (metric.kind === "stock") return metric.ytdChangeField ? "月底值／較年初變動" : "月底值";
-    return state.periodType === "ytd" ? "YTD（年初至今累計）" : "單月";
+    return state.periodType === "ytd" ? "YTD" : "單月";
   }
 
   /** 讀取某指標於某筆紀錄之統一視圖。periodType 僅對流量型指標生效。 */
@@ -737,12 +737,18 @@
     srTable.innerHTML = srHead + srBody;
     wrapEl.appendChild(srTable);
 
-    if (n < 2) {
+    if (n < 1) {
       var emptyMsg = document.createElement("p");
       emptyMsg.className = "scope-note";
       emptyMsg.textContent = "資料不足，無法繪製趨勢圖。";
       holder.appendChild(emptyMsg);
       return;
+    }
+    if (n === 1) {
+      var singleNote = document.createElement("p");
+      singleNote.className = "scope-note";
+      singleNote.textContent = "查詢期間僅1個月份，以單點顯示；如需查看趨勢，請增加查詢期間。";
+      wrapEl.insertBefore(singleNote, holder);
     }
 
     var allVals = [];
@@ -1015,15 +1021,67 @@
     return Object.prototype.hasOwnProperty.call(BANK_SHORT_NAMES, name) ? BANK_SHORT_NAMES[name] : name;
   }
 
+  /** 銀行常用口語簡稱：涵蓋正式名稱與既有簡稱之外、業務上常見的縮寫寫法，供全站銀行搜尋／選擇共用比對
+   * （僅用於搜尋比對，不影響畫面顯示之正式名稱或簡稱）。 */
+  var BANK_ALIASES = {
+    "臺灣銀行": ["台灣銀行", "台銀", "臺銀"],
+    "臺灣土地銀行": ["台灣土地銀行", "土銀", "土地銀行"],
+    "合作金庫商業銀行": ["合作金庫", "合庫"],
+    "第一商業銀行": ["第一銀行", "一銀"],
+    "華南商業銀行": ["華南銀行", "華銀"],
+    "彰化商業銀行": ["彰化銀行", "彰銀"],
+    "上海商業儲蓄銀行": ["上海銀行"],
+    "台北富邦商業銀行": ["台北富邦", "臺北富邦", "富邦銀行", "富邦"],
+    "國泰世華商業銀行": ["國泰世華", "國泰銀行", "國泰"],
+    "高雄銀行": ["高銀"],
+    "兆豐國際商業銀行": ["兆豐銀行", "兆豐", "兆豐商銀"],
+    "花旗(台灣)商業銀行": ["花旗台灣", "花旗銀行", "花旗"],
+    "臺灣中小企業銀行": ["臺灣中小企銀", "台灣中小企銀", "中小企銀", "台企銀", "臺企銀"],
+    "渣打國際商業銀行": ["渣打銀行", "渣打"],
+    "台中商業銀行": ["台中銀行", "臺中銀行"],
+    "滙豐(台灣)商業銀行": ["滙豐台灣", "匯豐台灣", "滙豐銀行", "匯豐銀行", "滙豐", "匯豐"],
+    "華泰商業銀行": ["華泰銀行"],
+    "臺灣新光商業銀行": ["台灣新光銀行", "新光銀行", "新光"],
+    "陽信商業銀行": ["陽信銀行"],
+    "三信商業銀行": ["三信銀行"],
+    "聯邦商業銀行": ["聯邦銀行", "聯邦"],
+    "遠東國際商業銀行": ["遠東商銀", "遠東銀行", "遠銀"],
+    "元大商業銀行": ["元大銀行", "元大"],
+    "永豐商業銀行": ["永豐銀行", "永豐"],
+    "玉山商業銀行": ["玉山銀行", "玉山"],
+    "凱基商業銀行": ["凱基銀行", "凱基"],
+    "星展(台灣)商業銀行": ["星展台灣", "星展銀行", "星展"],
+    "台新國際商業銀行": ["台新銀行", "台新"],
+    "安泰商業銀行": ["安泰銀行", "安泰"],
+    "中國信託商業銀行": ["中國信託", "中信銀行", "中信"],
+  };
+
+  /** 搜尋比對用正規化：台／臺、匯／滙為同義異體字，一律折疊為同一寫法後再比對；不分大小寫、去除頭尾空白。 */
+  function normalizeBankSearchText(s) {
+    return String(s || "").trim().toLowerCase().replace(/臺/g, "台").replace(/滙/g, "匯");
+  }
+
+  /** 銀行名稱／簡稱／常用別名是否符合搜尋字串（純函式，全站搜尋與選單共用，確保別名規則一致）。 */
+  function bankNameMatches(officialName, rawQuery) {
+    var q = normalizeBankSearchText(rawQuery);
+    if (!q) return true;
+    var candidates = [officialName, bankShortName(officialName)].concat(BANK_ALIASES[officialName] || []);
+    return candidates.some(function (c) { return normalizeBankSearchText(c).indexOf(q) >= 0; });
+  }
+
   /** 主要比較名單：所選月份月底流通卡數排名前12家銀行（依流通卡數名次；同名次以名稱穩定排序）。 */
   function top12Banks(period) {
+    return allBanks(period).slice(0, 12);
+  }
+
+  /** 全部銀行（固定30家）：依流通卡數排名排序，不篩選顯示列數。 */
+  function allBanks(period) {
     return issuersInPeriod(period)
       .filter(function (r) { return r.issuer_type === "bank" && isFiniteNumber(r.cards_in_force_bank_rank); })
       .sort(function (a, b) {
         if (a.cards_in_force_bank_rank !== b.cards_in_force_bank_rank) return a.cards_in_force_bank_rank - b.cards_in_force_bank_rank;
         return a.issuer_name < b.issuer_name ? -1 : a.issuer_name > b.issuer_name ? 1 : 0;
-      })
-      .slice(0, 12);
+      });
   }
 
   /** 第12名與第13名之流通卡數名次相同（並列）時為 true，須回報，不得默默擴增名單。 */
@@ -1036,10 +1094,28 @@
   }
 
   /**
-   * 「遠銀排名與同業差距」用名單（純資料，依範圍）：
-   * - top12（銀行範圍）：全部30家銀行，名次採既有 bankRank 欄位（全量排名，不重算）。「流通卡前12大」僅為下方
-   *   表格的顯示篩選條件，不影響此處排名母體，避免與表格口徑矛盾。
-   * - all：當月完整發卡機構名單，名次沿用既有 issuerRank 欄位（該欄位本身即為全量排名，不重算）。
+   * 標準競賽排名（1、2、2、4，與 scripts/calculate_metrics.py 之 standard_competition_rank 同一算法）：
+   * 依 valueFn 取得之數值由大至小排序，數值缺漏不納入排名。回傳以陣列索引為鍵的排名表。
+   */
+  function standardCompetitionRank(items, valueFn) {
+    var present = [];
+    items.forEach(function (it, idx) {
+      var v = valueFn(it);
+      if (isFiniteNumber(v)) present.push({ idx: idx, v: v });
+    });
+    present.sort(function (a, b) { return b.v - a.v; });
+    var ranks = {}, rank = 0, prevValue = null;
+    present.forEach(function (p, i) {
+      if (p.v !== prevValue) { rank = i + 1; prevValue = p.v; }
+      ranks[p.idx] = rank;
+    });
+    return ranks;
+  }
+
+  /**
+   * 「遠銀排名與同業差距」用名單（純資料，依範圍）：排名母體與目前顯示範圍一致。
+   * - top12：流通卡前12大銀行（依所選資料月份動態計算），名次為所選指標於這12家銀行中之排名（程式即時計算）。
+   * - all：當月完整發卡機構名單，名次沿用既有 issuerRank 欄位（該欄位本身即為當期全量排名）。
    * 回傳 [{row, view, rankVal}]；rankVal 可能為 null（無排名資料）。
    */
   function peerSummaryPool(period, metric, pType, scope) {
@@ -1049,9 +1125,12 @@
         return { row: r, view: view, rankVal: isFiniteNumber(view.issuerRank) ? view.issuerRank : null };
       }).filter(function (x) { return x.rankVal !== null; });
     }
-    return issuersInPeriod(period).filter(function (r) { return r.issuer_type === "bank"; }).map(function (r) {
-      var view = metricView(metric, r, pType);
-      return { row: r, view: view, rankVal: isFiniteNumber(view.bankRank) ? view.bankRank : null };
+    var banks = top12Banks(period);
+    var views = banks.map(function (r) { return metricView(metric, r, pType); });
+    var ranks = standardCompetitionRank(views, function (v) { return v.raw; });
+    return banks.map(function (r, idx) {
+      var rankVal = isFiniteNumber(ranks[idx]) ? ranks[idx] : null;
+      return { row: r, view: views[idx], rankVal: rankVal };
     }).filter(function (x) { return x.rankVal !== null; });
   }
 
@@ -1078,7 +1157,7 @@
    */
   function buildPeerCards(metric, scope, pool, feEntry, prevPool, prevFeEntry, basisLabel) {
     var scopeWord = scope === "all" ? "全" + pool.length + "家發卡機構" : "全" + pool.length + "家銀行";
-    var rankLabel = scope === "all" ? "遠銀發卡機構排名" : "遠銀銀行排名";
+    var rankLabel = "遠銀排名";
     var cards = [];
 
     if (!feEntry) {
@@ -1098,7 +1177,7 @@
     cards.push({
       label: rankLabel,
       value: isFiniteNumber(feRank) ? "第" + feRank + "名／" + pool.length + "家" : "缺排名資料",
-      sub: tied.length ? "與" + namesOf(tied) + "並列" : (scope === "all" ? "發卡機構排名母體為" + pool.length + "家" : "銀行排名母體為" + pool.length + "家"),
+      sub: tied.length ? "與" + namesOf(tied) + "並列" : (scope === "all" ? "在" + pool.length + "家發卡機構中排名" : "在" + pool.length + "家銀行中排名"),
     });
 
     function priorValueOf(name) {
@@ -1190,7 +1269,7 @@
   /** 差距的絕對值文字（無正負號），單位依指標；比率型為 pp。 */
   function fmtDistance(metric, n) {
     if (!isFiniteNumber(n)) return "—";
-    var unit = metric.fmtRaw === fmtPlainPct ? "pp" : displayUnit(metric);
+    var unit = metric.fmtRaw === fmtPlainPct ? " pp" : displayUnit(metric);
     return fmtDisplayNumber(metric, Math.abs(n)) + unit;
   }
 
@@ -1373,6 +1452,28 @@
   };
   function summaryTagFor(metric) { return SUMMARY_TAG_BY_METRIC[metric.id] || "其他指標"; }
 
+  /**
+   * 首頁「本月重點」三則固定圖示（純線條、單色、不含任何銀行識別），僅輔助辨識類別，
+   * 不搶過文字與數值：core＝金額／帳單（核心業務）、change＝排名長條（明顯變化）、watch＝信用卡（值得追查）。
+   */
+  var MGMT_ROLE_ICON = {
+    core: '<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" focusable="false">' +
+      '<rect x="2.3" y="5.2" width="15.4" height="9.6" rx="1.6" fill="none" stroke="currentColor" stroke-width="1.5"/>' +
+      '<circle cx="10" cy="10" r="2.1" fill="none" stroke="currentColor" stroke-width="1.5"/>' +
+      '<circle cx="4.6" cy="10" r="0.55" fill="currentColor"/><circle cx="15.4" cy="10" r="0.55" fill="currentColor"/>' +
+      '</svg>',
+    change: '<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" focusable="false">' +
+      '<rect x="2.6" y="11.2" width="3.3" height="5.8" rx="0.7" fill="none" stroke="currentColor" stroke-width="1.5"/>' +
+      '<rect x="8.35" y="7.2" width="3.3" height="9.8" rx="0.7" fill="none" stroke="currentColor" stroke-width="1.5"/>' +
+      '<rect x="14.1" y="3.2" width="3.3" height="13.8" rx="0.7" fill="none" stroke="currentColor" stroke-width="1.5"/>' +
+      '</svg>',
+    watch: '<svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true" focusable="false">' +
+      '<rect x="2.3" y="4.6" width="15.4" height="10.8" rx="1.8" fill="none" stroke="currentColor" stroke-width="1.5"/>' +
+      '<line x1="2.3" y1="8.1" x2="17.7" y2="8.1" stroke="currentColor" stroke-width="1.5"/>' +
+      '<line x1="4.8" y1="12.3" x2="9" y2="12.3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>' +
+      '</svg>',
+  };
+
   /** 將單則重點轉為 {tag, html}：結論一行（加粗），支持數字另起一行；指標名稱為可點擊連結。 */
   function homeSummaryLine(item) {
     var c = item.c, metric = c.metric;
@@ -1390,8 +1491,8 @@
       return {
         tag: summaryTagFor(metric),
         html: link + "<strong>" + escapeHtml(homeCoreConclusion(fe, mk, c.gap, basisWord)) + "</strong>。" +
-          '<span class="mgmt-support">（' + escapeHtml(basisWord) + '）遠銀 YOY ' + num(signedPct(fe), deltaClass(Number(fe.toFixed(2)))) +
-          '，市場 YOY ' + num(signedPct(mk), deltaClass(Number(mk.toFixed(2)))) + '，遠銀與市場相差 ' +
+          '<span class="mgmt-support">（' + escapeHtml(basisWord) + '）遠銀 YoY ' + num(signedPct(fe), deltaClass(Number(fe.toFixed(2)))) +
+          '，市場 YoY ' + num(signedPct(mk), deltaClass(Number(mk.toFixed(2)))) + '，遠銀與市場相差 ' +
           num(signedPp(c.gap), deltaClass(Number(c.gap.toFixed(2)))) + '。</span>',
       };
     }
@@ -1404,7 +1505,7 @@
         tag: summaryTagFor(metric),
         html: link + "<strong>" + escapeHtml("遠銀" + basisWord + shortName + valueWord + "，排名" + rankBasis +
           (up ? "上升 " : "下降 ") + Math.abs(c.rankChangeAmt) + " 名") + "</strong>。" +
-          '<span class="mgmt-support">遠銀' + escapeHtml(metric.label) + ' YOY ' +
+          '<span class="mgmt-support">遠銀' + escapeHtml(metric.label) + ' YoY ' +
           num(yoyOk ? signedPct(c.feV.yoy) : "缺同期資料", yoyOk ? deltaClass(Number(c.feV.yoy.toFixed(2))) : "delta-na") +
           '，目前排名第 ' + escapeHtml(String(c.feV.bankRank)) + ' 名。</span>',
       };
@@ -1459,7 +1560,9 @@
     items.forEach(function (item) {
       var line = homeSummaryLine(item);
       var li = document.createElement("li");
-      li.innerHTML = '<span class="mgmt-summary-tag tag-kind">' + escapeHtml(line.tag) + '</span>' + line.html;
+      li.innerHTML = '<span class="mgmt-icon" aria-hidden="true">' + (MGMT_ROLE_ICON[item.role] || "") + '</span>' +
+        '<span class="sr-only">' + escapeHtml(line.tag) + '</span>' +
+        '<div class="mgmt-card-body">' + line.html + '</div>';
       listEl.appendChild(li);
     });
   }
@@ -1516,7 +1619,7 @@
     var word = g2 > 0 ? "高於市場" : (g2 < 0 ? "低於市場" : "與市場持平");
     var pct = Math.min(Math.abs(g2) / scale, 1) * 50;
     var bar = g2 === 0 ? "" : '<span class="ov-diff-bar ' + (g2 > 0 ? "pos" : "neg") + '" style="width:' + pct.toFixed(2) + '%"></span>';
-    var tip = "遠銀YOY－市場YOY ＝ " + signedPp(gap) + "（遠銀YOY " + signedPct(feP.yoy) + "，市場YOY " + signedPct(mktP.yoy) + "）";
+    var tip = "遠銀 YoY－市場 YoY ＝ " + signedPp(gap) + "（遠銀 YoY " + signedPct(feP.yoy) + "，市場 YoY " + signedPct(mktP.yoy) + "）";
     return '<div class="ov-rel-text"><span class="ov-rel-word">' + word + '</span> <span class="ov-rel-num ' + deltaClass(g2) + '">' + escapeHtml(signedPp(gap)) + '</span></div>' +
       '<div class="ov-diff-track" role="img" aria-label="' + escapeHtml(tip) + '" title="' + escapeHtml(tip) + '">' +
       '<span class="ov-diff-zero"></span>' + bar + '</div>';
@@ -1548,7 +1651,7 @@
     } else if (isRatio) {
       yoyHtml = '<span class="ov-yoy-label">較去年同期</span> <span class="ov-yoy ' + deltaClass(Number(view.yoy.toFixed(2))) + '">' + escapeHtml(signedPp(view.yoy)) + '</span>';
     } else {
-      yoyHtml = '<span class="ov-yoy-label">YOY</span> <span class="ov-yoy ' + deltaClass(Number(view.yoy.toFixed(2))) + '">' + escapeHtml(signedPct(view.yoy)) + '</span>';
+      yoyHtml = '<span class="ov-yoy-label">YoY</span> <span class="ov-yoy ' + deltaClass(Number(view.yoy.toFixed(2))) + '">' + escapeHtml(signedPct(view.yoy)) + '</span>';
     }
     return '<td class="ov-value-cell ov-detail-link ' + (label === "整體市場" ? "ov-col-market" : "ov-col-fareast") + '" data-metric="' + id + '" data-label="' + label + '" tabindex="0" role="button">' +
       '<div class="ov-main"><span class="ov-link-value">' + escapeHtml(metricDisplayText(metric, view)) + '</span></div>' +
@@ -1563,13 +1666,14 @@
     var prevFe = findFarEastern(prevYearPeriod(period));
     var basisLine = document.getElementById("overview-basis-line");
     if (basisLine) {
-      basisLine.textContent = "民國" + periodShortLabel(mkt) + "｜卡數、有效卡率與應收帳款呈現當月值；發卡與消費指標採" +
-        (state.overviewBasis === "ytd" ? "年初至今累計。" : "單月值。");
+      basisLine.textContent = "民國" + periodShortLabel(mkt) + "｜卡數與比率為單月；發卡與簽帳金額為" +
+        (state.overviewBasis === "ytd" ? "YTD。" : "單月。");
     }
     var scale = overviewGapScale(period);
     var scaleNote = document.getElementById("overview-scale-note");
     if (scaleNote) {
-      scaleNote.textContent = "差異條：低於市場 ← 0 → 高於市場｜共同尺度 ±" + scale + " pp（所有 YOY 列一致；有效卡率不納入）。相對市場差＝遠銀YOY－市場YOY。";
+      scaleNote.textContent = "橫條向左代表低於市場，向右代表高於市場。";
+      scaleNote.title = "差異條共同尺度 ±" + scale + " pp（所有 YoY 列一致；有效卡率不納入，另以當月比率比較呈現）。相對市場差＝遠銀 YoY－市場 YoY。";
     }
 
     OVERVIEW_GROUPS.forEach(function (group) {
@@ -1584,9 +1688,9 @@
         var mktP = metricView(metric, mkt, pType), feP = metricView(metric, fe, pType);
         var prevP = metricView(metric, prevFe, pType);
         var gap = metricRelativeGap(metric, feP, mktP);
-        // 只有受口徑切換影響的指標標示「年初至今累計」或「單月」，其他指標不重複標示。
+        // 只有受口徑切換影響的指標標示「YTD」或「單月」，其他指標不重複標示。
         var basisTag = OVERVIEW_BASIS_METRICS.indexOf(id) >= 0
-          ? '<span class="ov-basis-tag">' + (pType === "ytd" ? "年初至今（YTD）" : "單月") + '</span>' : "";
+          ? '<span class="ov-basis-tag">' + (pType === "ytd" ? "YTD" : "單月") + '</span>' : "";
 
         var tr = document.createElement("tr");
         tr.className = "ov-row";
@@ -1594,7 +1698,7 @@
           '<th scope="row"><button type="button" class="ov-link-btn ov-trend-link ov-link-value" data-metric="' + id + '">' + escapeHtml(metric.label) + '</button>' + basisTag + '</th>' +
           overviewValueCell(metric, mktP, id, "整體市場") +
           overviewValueCell(metric, feP, id, "遠銀") +
-          '<td class="ov-rel" data-label="相對市場表現">' + overviewRelHtml(metric, feP, mktP, gap, scale) + '</td>' +
+          '<td class="ov-rel" data-label="與市場比較">' + overviewRelHtml(metric, feP, mktP, gap, scale) + '</td>' +
           '<td class="ov-rank-cell" data-label="銀行排名（30家）">' + overviewRankHtml(id, feP, prevP, pType) + '</td>';
         tbody.appendChild(tr);
       });
@@ -1603,8 +1707,9 @@
 
   function goToMetricTab(tabId, metricId) {
     var metric = METRIC_CATALOG[metricId];
-    // 原「資料明細」入口已併入同業比較：開啟全部發卡機構模式；同業比較入口回到前12大銀行預設範圍。
-    if (tabId === "detail") { tabId = "peers"; state.peersScope = "all"; state.peersSearch = ""; }
+    // 首頁所有跳轉統一預設「流通卡前12大銀行」範圍（同業比較頁預設範圍），
+    // 使用者如需查看全部32家發卡機構，於同業比較頁自行切換範圍。
+    if (tabId === "detail") { tabId = "peers"; state.peersScope = "top12"; state.peersSearch = ""; }
     else if (tabId === "peers") { state.peersScope = "top12"; state.peersSearch = ""; }
     state.activeMetricId = metricId;
     state.periodType = metric && metricSupportsPeriodType(metric) ? overviewPeriodType(metric) : "month";
@@ -1642,18 +1747,6 @@
     }
   }
 
-  function bindStickyToggle() {
-    var btn = document.getElementById("sticky-toggle");
-    var bar = document.getElementById("sticky-bar");
-    if (!btn || !bar) return;
-    btn.addEventListener("click", function () {
-      var open = !bar.classList.contains("is-open");
-      bar.classList.toggle("is-open", open);
-      btn.setAttribute("aria-expanded", open ? "true" : "false");
-      renderStickyBar();
-    });
-  }
-
   function bindOverviewBasisSwitch() {
     document.querySelectorAll("#ov-basis-switch .period-type-btn").forEach(function (btn) {
       btn.addEventListener("click", function () {
@@ -1679,8 +1772,8 @@
 
   var TREND_MARKET_COLOR = "#6f8196";
   var TREND_FE_COLOR = "#e07b1a";
-  var TREND_POS_COLOR = "#173458";
-  var TREND_ZERO_COLOR = "#9AA3B0";
+  var TREND_POS_COLOR = "var(--color-brand)";
+  var TREND_ZERO_COLOR = "var(--baseline)";
   var TREND_RANK_COUNT = 30;
 
   function isCardMetric(metric) {
@@ -1810,7 +1903,7 @@
 
     var compare = {
       kind: "line",
-      title: isRatio ? "有效卡率｜較去年同期變化" : name + "｜較去年同期變化（YOY）",
+      title: isRatio ? "有效卡率｜較去年同期變化" : name + "｜較去年同期變化（YoY）",
       unit: isRatio ? "pp" : "%",
       series: [yoySeries("market"), yoySeries("fareast")],
       zeroBase: true,
@@ -1836,7 +1929,7 @@
         }],
         zeroBase: true,
         breakAtNewYear: false,
-        noteFn: function () { return "當期比率差為水準差，非同期變化；不計算市占率。"; },
+        noteFn: function () { return "這裡比較同一月份遠銀與市場的有效卡率差距；不計算市占率。"; },
       };
     } else if (kind === "flow_no_share") {
       position = {
@@ -1856,7 +1949,7 @@
         invert: true,
         domain: [1, TREND_RANK_COUNT],
         breakAtNewYear: ytd,
-        noteFn: function () { return "排名母體為全部30家銀行，不因顯示範圍重新排名；每卡金額不計算市占率。"; },
+        noteFn: function () { return "排名範圍為全部30家銀行，不因顯示範圍重新排名；每卡金額不計算市占率。"; },
       };
     } else {
       var shareOf = function (p) {
@@ -1876,13 +1969,15 @@
         }],
         zeroBase: true,
         breakAtNewYear: ytd,
+        // 明確標示比較基準為「期間起點至終點」（本圖表所選月份範圍），與下方「市占率較去年同期變化」卡片（YoY 基準）
+        // 為不同比較對象，避免兩個百分點數字並列時使用者誤以為矛盾。
         noteFn: function (periods) {
           var a = shareOf(periods[0]), b = shareOf(periods[periods.length - 1]);
-          if (!isFiniteNumber(a) || !isFiniteNumber(b)) return "市占率：期初或期末缺資料，無法計算期間變化。";
+          if (!isFiniteNumber(a) || !isFiniteNumber(b)) return "期間起點至終點：期初或期末缺資料，無法計算。";
           var diff = Number((b - a).toFixed(2));
           var dirWord = diff > 0 ? "上升" : (diff < 0 ? "下降" : "持平");
-          return rocYearMonthShort(periods[0]) + "：" + fmtPlainPct(a, 2) + " → " + rocYearMonthShort(periods[periods.length - 1]) + "：" + fmtPlainPct(b, 2) +
-            "，" + dirWord + (diff === 0 ? "" : Math.abs(diff).toFixed(2) + " pp");
+          return "期間起點至終點（" + rocYearMonthShort(periods[0]) + " → " + rocYearMonthShort(periods[periods.length - 1]) + "）：" +
+            dirWord + (diff === 0 ? "" : " " + Math.abs(diff).toFixed(2) + " pp") + "（" + fmtPlainPct(a, 2) + " → " + fmtPlainPct(b, 2) + "）";
         },
       };
     }
@@ -1972,21 +2067,21 @@
     // 格線與刻度（格線淡色；0 基準線為 1px 中灰，畫在資料線下層）
     dom.ticks.forEach(function (t) {
       var y = yOf(t);
-      el("line", { x1: plotL, x2: plotR, y1: y, y2: y, stroke: "#E4E7EC", "stroke-width": 1 });
-      el("text", { x: plotL - 10, y: y + 4, "font-size": 13, fill: "#52545c", "text-anchor": "end" }, tickText(t));
+      el("line", { x1: plotL, x2: plotR, y1: y, y2: y, stroke: "var(--gridline)", "stroke-width": 1 });
+      el("text", { x: plotL - 10, y: y + 4, "font-size": 13, fill: "var(--text-secondary)", "text-anchor": "end" }, tickText(t));
     });
     if (!slot.invert && dom.min < 0 && dom.max > 0) {
       el("line", { x1: plotL, x2: plotR, y1: yOf(0), y2: yOf(0), stroke: TREND_ZERO_COLOR, "stroke-width": 1 });
     }
     // 年度分界（虛線淡色）
     for (var i = 1; i < n; i++) {
-      if (isYearBoundary(periods, i)) el("line", { x1: xOf(i), x2: xOf(i), y1: plotT, y2: plotB, stroke: "#B8C4D2", "stroke-width": 1, "stroke-dasharray": "4 3" });
+      if (isYearBoundary(periods, i)) el("line", { x1: xOf(i), x2: xOf(i), y1: plotT, y2: plotB, stroke: "var(--gridline)", "stroke-width": 1, "stroke-dasharray": "4 3" });
     }
     // 月份刻度：首尾必顯示，中間依寬度略過
     selectAxisLabelIndices(periods, xOf, 13).forEach(function (j) {
       var anchor = j === 0 ? "start" : (j === n - 1 ? "end" : "middle");
       var x = j === 0 ? plotL : (j === n - 1 ? plotR : xOf(j));
-      el("text", { x: x, y: H - 12, "font-size": 13, fill: "#52545c", "text-anchor": anchor }, rocYearMonthShort(periods[j]));
+      el("text", { x: x, y: H - 12, "font-size": 13, fill: "var(--text-secondary)", "text-anchor": anchor }, rocYearMonthShort(periods[j]));
     });
 
     // 系列
@@ -2014,7 +2109,7 @@
         el("path", pathAttrs);
         vs.forEach(function (v, k) {
           if (!isFiniteNumber(v)) return;
-          if (s.prev) el("circle", { cx: xOf(k), cy: yOf(v), r: 3, fill: "#ffffff", stroke: s.color, "stroke-width": 1.5 });
+          if (s.prev) el("circle", { cx: xOf(k), cy: yOf(v), r: 3, fill: "var(--surface-1)", stroke: s.color, "stroke-width": 1.5 });
           else el("circle", { cx: xOf(k), cy: yOf(v), r: 3, fill: s.color });
         });
         if (!s.prev) {
@@ -2037,7 +2132,7 @@
     }
     endLabels.forEach(function (lb) {
       el("text", { x: lb.x - 6, y: lb.y, "font-size": 13, "font-weight": 800, fill: TREND_POS_COLOR, "text-anchor": "end",
-        stroke: "#ffffff", "stroke-width": 3, "paint-order": "stroke" }, lb.text);
+        stroke: "var(--surface-1)", "stroke-width": 3, "paint-order": "stroke" }, lb.text);
     });
 
     // 懸停導引線與 tooltip（只在圖區內顯示）
@@ -2122,12 +2217,6 @@
 
     var periods = trendPeriodsFor(period);
     var endP = periods.length ? periods[periods.length - 1] : period;
-    var captionEl = document.getElementById("trend-period-caption");
-    if (captionEl && periods.length) {
-      var parts = ["實際期間：" + rocYearMonthShort(periods[0]) + "至" + rocYearMonthShort(endP) + "（共" + periods.length + "個月）"];
-      if (metricSupportsPeriodType(metric) && pType === "ytd") parts.push("YTD為年初至今累計，每年1月重新起算，跨年度分段顯示");
-      captionEl.textContent = parts.join("｜");
-    }
 
     var plan = trendPlanFor(metric, pType);
     renderTrendCard("market", plan.market, periods);
@@ -2139,9 +2228,9 @@
     renderDiagnosisTable(endP);
   }
 
-  /** 診斷標題的數據方式字樣：流量型依單月／年初至今累計，存量與比率為當月值。 */
+  /** 診斷標題的數據方式字樣：流量型依單月／YTD，存量與比率為當月值。 */
   function diagBasisWord(metric, pType) {
-    return metricSupportsPeriodType(metric) ? (pType === "ytd" ? "年初至今累計" : "單月") : "當月值";
+    return metricSupportsPeriodType(metric) ? (pType === "ytd" ? "YTD" : "單月") : "當月值";
   }
 
   /** 數字負號統一為「−」（U+2212）；僅用於診斷與同期變化數字的顯示，不改動計算。 */
@@ -2160,7 +2249,7 @@
       var r = Number(v.toFixed(2));
       return { text: diagSign(isRatio ? signedPp(v) : signedPct(v)), cls: deltaClass(r), ok: true };
     }
-    if (prevRaw === 0) return { text: "去年同期為0，無法計算YOY", cls: "delta-na", ok: false };
+    if (prevRaw === 0) return { text: "去年同期為0，無法計算 YoY", cls: "delta-na", ok: false };
     return { text: "去年同期資料不足", cls: "delta-na", ok: false };
   }
 
@@ -2193,7 +2282,7 @@
     function sg(v, unit) { return (v > 0 ? "+" : (v < 0 ? "−" : "")) + Math.abs(v).toFixed(2) + unit; }
     var head = isRatio
       ? "市場" + subj + "較去年同期" + sg(m, " pp") + "，遠銀" + sg(f, " pp")
-      : "市場" + subj + "YOY" + sg(m, "%") + "，遠銀" + sg(f, "%");
+      : "市場" + subj + "YoY" + sg(m, "%") + "，遠銀" + sg(f, "%");
     var clause = "";
     if (isFiniteNumber(gap0)) {
       var g = Number(gap0.toFixed(2));
@@ -2254,14 +2343,17 @@
     items.push(diagItemHtml("遠銀" + (ytd ? "累計" : "") + diagShortName(metric), metricDisplayText(metric, feV), ""));
 
     var feChg = diagChangeResult(feV.yoy, isRatio, prevFeV.raw);
-    items.push(diagItemHtml(isRatio ? "遠銀較去年同期變化" : "遠銀YOY", feChg.text, feChg.cls));
+    items.push(diagItemHtml(isRatio ? "遠銀較去年同期變化" : "遠銀 YoY", feChg.text, feChg.cls));
 
     var mkChg = diagChangeResult(mktV.yoy, isRatio, prevMktV.raw);
-    items.push(diagItemHtml(isRatio ? "市場較去年同期變化" : "市場YOY", mkChg.text, mkChg.cls));
+    items.push(diagItemHtml(isRatio ? "市場較去年同期變化" : "市場 YoY", mkChg.text, mkChg.cls));
 
+    // 標題改為結論式寫法（例如「低於市場 −16.30 pp」），不使用「YoY差距（遠銀－市場）」等口徑式名稱；
+    // 卡片樣式與其餘五張一致為白底，不再以淡藍底特別標示，避免使用者誤以為有特殊意涵。
     var gap = metricRelativeGap(metric, feV, mktV);
-    items.push(diagItemHtml(isRatio ? "遠銀－市場當期比率差" : "YOY差距（遠銀－市場）",
-      isFiniteNumber(gap) ? diagSign(signedPp(gap)) : "缺資料",
+    var gapWord = !isFiniteNumber(gap) ? "" : (gap > 0 ? "高於市場" : (gap < 0 ? "低於市場" : "與市場持平"));
+    items.push(diagItemHtml("與市場比較",
+      isFiniteNumber(gap) ? (gap === 0 ? gapWord : gapWord + " " + diagSign(signedPp(gap))) : "缺資料",
       isFiniteNumber(gap) ? deltaClass(Number(gap.toFixed(2))) : "delta-na", true));
 
     var shareApplicable = !isRatio && metric.kind !== "flow_no_share" && metricSupportsShare(metric);
@@ -2299,14 +2391,14 @@
       var mktV = metricView(metric, mkt, pType);
       var feP = metricView(metric, feRecPrevY, pType);
       var mktP = metricView(metric, mktRecPrevY, pType);
-      var prefix = isRatio ? "較去年同期 " : "YOY ";
+      var prefix = isRatio ? "較去年同期 " : "YoY ";
 
       var feC = diagChangeResult(feV.yoy, isRatio, feP.raw);
       var mkC = diagChangeResult(mktV.yoy, isRatio, mktP.raw);
       var gap = metricRelativeGap(metric, feV, mktV);
       var gapCls = isFiniteNumber(gap) ? deltaClass(Number(gap.toFixed(2))) : "delta-na";
       var relWord = isFiniteNumber(gap)
-        ? (isRatio ? "當期" : "YOY") + (gap > 0 ? "高於市場" : (gap < 0 ? "低於市場" : "與市場持平"))
+        ? (isRatio ? "當期" : "YoY") + (gap > 0 ? "高於市場" : (gap < 0 ? "低於市場" : "與市場持平"))
         : "缺資料";
       var relVal = isFiniteNumber(gap) ? diagSign(signedPp(gap)) : "";
 
@@ -2348,7 +2440,7 @@
   /** 單月／YTD 僅適用於流量型指標；其他指標不加數據方式標籤。 */
   function peerBasisTag(metric, pType) {
     if (!metricSupportsPeriodType(metric)) return "";
-    return pType === "ytd" ? "年初至今（YTD）" : "單月";
+    return pType === "ytd" ? "YTD" : "單月";
   }
 
   function peerCaptionSuffix(metric, pType) {
@@ -2372,9 +2464,9 @@
   // ==================================================================
 
   /**
-   * 同業比較列（純資料）：「流通卡前12大銀行」僅為顯示列之篩選條件（依所選月份月底流通卡數選取，不隨指標切換而換名單），
-   * 不是排名母體；表內排名一律採既有全母體欄位（銀行固定30家用bankRank、發卡機構依當月家數用issuerRank），
-   * 不因篩選顯示列、搜尋或排序而重新計算，避免與「遠銀排名與同業差距」區塊口徑矛盾。
+   * 同業比較列（純資料）：排名母體與目前顯示範圍一致——
+   * 流通卡前12大銀行模式下，排名於這12家銀行內即時計算（標準競賽排名）；
+   * 全部發卡機構模式下，排名沿用當期 issuerRank 欄位（已是當月全量排名）。
    */
   function peerRowsFor(period, metric, pType, scope) {
     var pool = scope === "all" ? issuersInPeriod(period) : top12Banks(period);
@@ -2382,12 +2474,14 @@
     issuersInPeriod(prevYearPeriod(period)).forEach(function (r) { prevByName[r.issuer_name] = r; });
     var fe = findFarEastern(period);
     var feVal = fe ? displayNumber(metric, metricView(metric, fe, pType)) : null;
-    return pool.map(function (r) {
-      var v = metricView(metric, r, pType);
+    var views = pool.map(function (r) { return metricView(metric, r, pType); });
+    var ranks = scope === "all" ? null : standardCompetitionRank(views, function (v) { return v.raw; });
+    return pool.map(function (r, idx) {
+      var v = views[idx];
       var prev = prevByName[r.issuer_name];
       var val = displayNumber(metric, v);
       var isFe = r.issuer_name === FAR_EASTERN_NAME;
-      var rankVal = scope === "all" ? v.issuerRank : v.bankRank;
+      var rankVal = scope === "all" ? v.issuerRank : ranks[idx];
       return {
         isFe: isFe,
         name: r.issuer_name,
@@ -2401,6 +2495,13 @@
       };
     });
   }
+
+  /** 比較範圍顯示名稱：兩個選項固定對應固定文字，避免同一畫面重複寫出「12家」「32家」等字樣。 */
+  function peerScopeLabel(scope) {
+    if (scope === "all") return "全部發卡機構（32家）";
+    return "流通卡前12大銀行";
+  }
+
 
   /** 排名欄名稱：隨指標更新（例如「簽帳金額排名」「有效卡率排名」），兩種範圍皆僅保留單一排名欄。 */
   function peerRankLabel(metric) {
@@ -2431,13 +2532,11 @@
     state.peersSortDir = s.dir;
   }
 
-  /** 搜尋（純函式）：機構全名或既有簡稱包含關鍵字即符合，不分大小寫。 */
+  /** 搜尋（純函式）：機構全名、既有簡稱或常用別名包含關鍵字即符合，不分大小寫，台／臺與匯／滙視為相同。 */
   function filterPeerRows(rows, query) {
-    var q = String(query || "").trim().toLowerCase();
+    var q = String(query || "").trim();
     if (!q) return rows;
-    return rows.filter(function (x) {
-      return x.name.toLowerCase().indexOf(q) >= 0 || bankShortName(x.name).toLowerCase().indexOf(q) >= 0;
-    });
+    return rows.filter(function (x) { return bankNameMatches(x.name, q); });
   }
 
   function gapUnit(metric) {
@@ -2465,9 +2564,9 @@
     var isRatio = metric.kind === "ratio";
     if (isFiniteNumber(x.yoy)) {
       var s = isRatio ? signedPp(x.yoy) : signedPct(x.yoy);
-      return (isRatio ? "較去年同期 " : "YOY ") + s.replace("-", "−");
+      return (isRatio ? "較去年同期 " : "YoY ") + s.replace("-", "−");
     }
-    if (x.prevRaw === 0) return "去年同期為0，無法計算YOY";
+    if (x.prevRaw === 0) return "去年同期為0，無法計算 YoY";
     return "缺同期資料";
   }
 
@@ -2520,17 +2619,17 @@
       }).join("");
     }
     var scopeTitleEl = document.getElementById("peers-summary-title");
-    if (scopeTitleEl) scopeTitleEl.textContent = "遠銀排名與同業差距（" + (scopeNow === "all" ? "全部發卡機構" : "全30家銀行") + "）";
+    if (scopeTitleEl) scopeTitleEl.textContent = "遠銀排名與同業差距";
 
     var marketLineEl = document.getElementById("peers-market-line");
     if (marketLineEl) {
       var mv = metricView(metric, findMarket(period), pType);
       var isRatio = metric.kind === "ratio";
       var mvText = isRatio ? (isFiniteNumber(mv.yoy) ? "較去年同期 " + signedPp(mv.yoy) : "缺同期資料")
-        : (isFiniteNumber(mv.yoy) ? "YOY " + signedPct(mv.yoy) : "缺同期資料");
+        : (isFiniteNumber(mv.yoy) ? "YoY " + signedPct(mv.yoy) : "缺同期資料");
       var mvCls = isFiniteNumber(mv.yoy) ? deltaClass(Number(mv.yoy.toFixed(2))) : "delta-na";
-      marketLineEl.innerHTML = escapeHtml("整體市場" + metric.label + "年度變動：") + '<strong class="' + mvCls + '">' + escapeHtml(mvText) + '</strong>' +
-        escapeHtml("（比較基準：" + (pType === "ytd" ? "去年同期年初至今累計" : "去年同月") + "）");
+      marketLineEl.innerHTML = escapeHtml("整體市場" + metric.label + "同期變化：") + '<strong class="' + mvCls + '">' + escapeHtml(mvText) + '</strong>' +
+        escapeHtml("（比較基準：" + (pType === "ytd" ? "去年同期 YTD" : "去年同月") + "）");
     }
 
     renderPeersTable(period, metric, pType);
@@ -2566,8 +2665,8 @@
       var empty = document.createElement("tr");
       empty.className = "empty-row";
       var msg = q
-        ? "沒有符合「" + escapeHtml(q) + "」的" + (scope === "all" ? "發卡機構" : "銀行") + "。" +
-          (scope === "top12" ? "搜尋只作用於前12大銀行；可切換至「全部發卡機構」再查詢。" : "") +
+        ? "找不到符合「" + escapeHtml(q) + "」的銀行，請試試銀行名稱或簡稱。" +
+          (scope === "top12" ? "若該銀行不在流通卡前12大，可切換至「全部發卡機構」再查詢。" : "") +
           ' <button type="button" class="ghost-btn peers-clear-search">清除搜尋</button>'
         : "目前範圍沒有可顯示的資料。";
       empty.innerHTML = '<td colspan="' + cols.length + '">' + msg + "</td>";
@@ -2580,26 +2679,30 @@
       tbody.appendChild(tr);
     });
 
+    // 表格標題不重複列出範圍名稱／家數（已由上方範圍按鈕與下方單行說明標示），僅作為表格區塊標題。
     var titleEl = document.getElementById("peers-table-title");
-    if (titleEl) titleEl.textContent = (scope === "all" ? "全部發卡機構" : "流通卡前12大銀行") + "｜同業比較";
+    if (titleEl) titleEl.textContent = "同業比較明細";
     var captionEl = document.getElementById("peers-table-caption");
     if (captionEl) {
+      // 排名範圍不在此重複列出，已於下方單行說明（noteEl）統一標示，避免同一畫面多處出現「30家」「32家」。
       var mkt = findMarket(period);
       captionEl.textContent = (mkt ? periodShortLabel(mkt) : "—") + "｜" + metric.label + peerCaptionSuffix(metric, pType) +
-        "｜單位：" + displayUnit(metric) + (metric.kind === "ratio" ? "（差額單位 pp）" : "") +
-        "｜排名母體：" + (scope === "all" ? "當月全部" + all.length + "家發卡機構" : "全30家銀行");
+        "｜單位：" + displayUnit(metric) + (metric.kind === "ratio" ? "（差額單位 pp）" : "");
     }
     var noteEl = document.getElementById("peers-table-note");
     if (noteEl) {
-      noteEl.textContent = scope === "all"
-        ? "比較對象：當月全部發卡機構；表內排名為所選指標在全部" + all.length + "家發卡機構中的排名。"
-        : "比較對象：依所選月份流通卡數選取前12大銀行；表內排名為所選指標在全部30家銀行中的排名。";
+      // 兩句短句分行說明「目前顯示」與「排名母體」，避免標題、卡片、備註、表格重複出現「30家」「32家」等字樣，
+      // 也避免寫成一整串冗長句子。
+      var showWord = scope === "all" ? "全部發卡機構" : "流通卡前12大銀行";
+      var poolWord = scope === "all" ? all.length + "家發卡機構" : all.length + "家銀行";
+      noteEl.innerHTML = '<span class="peers-scope-line">目前顯示：' + escapeHtml(showWord) + '</span>' +
+        '<span class="peers-scope-line">排名母體：' + escapeHtml(poolWord) + '</span>';
     }
     var countEl = document.getElementById("peers-count");
     if (countEl) {
+      // 未搜尋時列數與範圍說明（noteEl）已表達相同資訊，不重複顯示「顯示 N 家」；僅搜尋時才提供新資訊（符合筆數）。
       var unitWord = scope === "all" ? "家發卡機構" : "家銀行";
-      countEl.textContent = (q ? "搜尋「" + q + "」：符合 " + rows.length + " " + unitWord : "顯示 " + rows.length + " " + unitWord) +
-        "（範圍內共 " + all.length + " " + unitWord + "）";
+      countEl.textContent = q ? "搜尋「" + q + "」：符合 " + rows.length + " " + unitWord + "（範圍內共 " + all.length + " " + unitWord + "）" : "";
     }
     syncPeersControls(q);
   }
@@ -2679,13 +2782,14 @@
     var short = METRIC_SHORT_NAMES[metric.id] || metric.label;
     var basis = peerBasisTag(metric, pType);
     var valueHead = short + "（" + displayUnit(metric) + "）" + (basis ? "｜" + basis : "");
-    var scopeLabel = scope === "all" ? "全部發卡機構" : "流通卡前12大銀行";
+    var scopeLabel = peerScopeLabel(scope);
     var q = state.peersSearch.trim();
     var issuerCountNow = issuersInPeriod(period).length;
+    var bankPoolCountNow = top12Banks(period).length;
     var headMap = {
       name: scope === "all" ? "機構名稱" : "銀行", type: "類型", value: valueHead,
-      yoy: isRatio ? "較去年同期變化（pp）" : "YOY（%）", share: "市占率（%）",
-      rank: short + "排名（" + (scope === "all" ? issuerCountNow + "家發卡機構" : "全30家銀行") + "）",
+      yoy: isRatio ? "較去年同期變化（pp）" : "YoY（%）", share: "市占率（%）",
+      rank: short + "排名（" + (scope === "all" ? issuerCountNow + "家發卡機構" : bankPoolCountNow + "家銀行") + "）",
       gap: "與遠銀差額（" + gapUnit(metric) + "）",
     };
     var header = ["資料月份（西元）", "比較範圍", "本行"].concat(cols.map(function (c) { return headMap[c.k]; }));
@@ -2759,7 +2863,7 @@
     var fe = findFarEastern(period), mkt = findMarket(period);
     if (!fe || !mkt) return;
     var prevFe = findFarEastern(prevYearPeriod(period));
-    var basisWord = state.overviewBasis === "ytd" ? "年初至今累計" : "單月";
+    var basisWord = state.overviewBasis === "ytd" ? "YTD" : "單月";
     // R04修正：補上資料月份欄位（西元／民國），避免匯出後脫離檔名即無法判斷資料所屬月份（與趨勢／同業CSV口徑一致）。
     var rocLabel = (parseInt(period.slice(0, 4), 10) - 1911) + "年" + parseInt(period.slice(5, 7), 10) + "月";
     var header = ["資料月份（西元）", "資料月份（民國）", "指標", "數據方式", "單位", "整體市場數值", "市場同期變化（%或pp）", "遠銀數值", "遠銀同期變化（%或pp）",
@@ -2891,6 +2995,7 @@
     if (tabId === "trends") renderTrendsTab(state.selectedPeriod);
     if (tabId === "overview") { renderManagementSummary(state.selectedPeriod); renderAllMetricsOverview(state.selectedPeriod); }
     if (tabId === "custom") renderCustomTab();
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }
 
   /**
@@ -2899,27 +3004,33 @@
    * 其餘控制項（指標、數據方式、期間）一律隱藏，避免使用者誤以為這些控制項
    * 會影響首頁內容（舊版正是因此造成狀態混亂）。
    */
+  /**
+   * 共用操作列（四個分頁固定同一順序／位置／樣式：資料月份｜指標｜統計方式｜分析期間）。
+   * 市場總覽與自訂比較頁不使用全域指標／統計方式／分析期間（各自在下方內容區有專屬控制項），
+   * 故這三個欄位整列隱藏，不顯示無法操作的灰色佔位按鈕或「見下表」「依選擇銀行調整」等提示文字，
+   * 避免使用者誤以為是壞掉的功能；僅趨勢分析／同業比較頁才顯示實際可操作的指標與統計方式控制項。
+   */
   function renderStickyBar() {
     var isOverview = state.activeTab === "overview";
     var isCustom = state.activeTab === "custom";
+    var isPeers = state.activeTab === "peers";
+    var isTrends = state.activeTab === "trends";
+    var hideGlobalControls = isOverview || isCustom;
 
     var overviewHint = document.getElementById("sticky-overview-hint");
-    var metricField = document.getElementById("sticky-metric-field");
-    var rangeGroup = document.getElementById("sticky-range-group");
-    var customPanel = document.getElementById("custom-range-panel");
-
     if (overviewHint) overviewHint.hidden = !isOverview;
-    if (metricField) metricField.hidden = isOverview || isCustom;
-    if (rangeGroup) rangeGroup.hidden = isOverview || isCustom || state.activeTab === "peers";
-    if (customPanel && (isOverview || state.activeTab === "peers")) customPanel.hidden = true;
+
+    var metricField = document.getElementById("sticky-metric-field");
+    if (metricField) metricField.hidden = hideGlobalControls;
 
     var metric = METRIC_CATALOG[state.activeMetricId];
     var compareLabel = document.getElementById("sticky-compare-label");
     var periodTypeToggle = document.getElementById("sticky-period-type-toggle");
-    if (isOverview || isCustom) {
-      if (compareLabel) compareLabel.hidden = true;
-      if (periodTypeToggle) periodTypeToggle.hidden = true;
+    var basisField = document.getElementById("sticky-basis-field");
+    if (hideGlobalControls) {
+      if (basisField) basisField.hidden = true;
     } else if (metricSupportsPeriodType(metric)) {
+      if (basisField) basisField.hidden = false;
       if (compareLabel) compareLabel.hidden = true;
       if (periodTypeToggle) {
         periodTypeToggle.hidden = false;
@@ -2928,13 +3039,27 @@
         });
       }
     } else {
+      if (basisField) basisField.hidden = false;
       if (periodTypeToggle) periodTypeToggle.hidden = true;
       if (compareLabel) { compareLabel.hidden = false; compareLabel.textContent = compareModeLabel(metric); }
     }
 
+    // 分析期間欄位：僅趨勢分析頁使用近6／12個月與自訂期間；市場總覽、自訂比較、同業比較頁皆整列隱藏
+    // （同業比較為當期排名，沒有可調整的期間，顯示「不適用」容易讓人誤以為可以設定期間，故直接移除欄位）。
+    var rangeField = document.getElementById("sticky-range-field");
+    var rangeGroup = document.getElementById("sticky-range-group");
+    var customPanel = document.getElementById("custom-range-panel");
+    if (isTrends) {
+      if (rangeField) rangeField.hidden = false;
+      if (rangeGroup) rangeGroup.hidden = false;
+    } else {
+      if (rangeField) rangeField.hidden = true;
+      if (customPanel) customPanel.hidden = true;
+    }
+
     var customPeriodEl = document.getElementById("sticky-custom-period");
+    var showCustom = isTrends && state.trendRange === "custom" && state.customStart && state.customEnd;
     if (customPeriodEl) {
-      var showCustom = state.activeTab === "trends" && state.trendRange === "custom" && state.customStart && state.customEnd;
       customPeriodEl.hidden = !showCustom;
       if (showCustom) {
         customPeriodEl.textContent = "自訂期間｜" + customRangeCaption(state.customStart, state.customEnd);
@@ -2942,14 +3067,6 @@
     }
 
     var stickyBar = document.getElementById("sticky-bar");
-    var toggleEl = document.getElementById("sticky-toggle");
-    if (toggleEl) {
-      var mktNow = findMarket(state.selectedPeriod);
-      var tmetric = METRIC_CATALOG[state.activeMetricId];
-      var openNow = stickyBar && stickyBar.classList.contains("is-open");
-      toggleEl.textContent = (openNow ? "收合操作列 ▴" : "操作列：") + (openNow ? "" : (mktNow ? periodShortLabel(mktNow) : "—") + "｜" + tmetric.label +
-        (metricSupportsPeriodType(tmetric) ? "｜" + (state.periodType === "ytd" ? "年初至今（YTD）" : "單月") : "") + " ▾");
-    }
     if (stickyBar) document.documentElement.style.setProperty("--sticky-h", stickyBar.offsetHeight + "px");
 
     updateExportButtonLabel();
@@ -3073,14 +3190,21 @@
     });
   }
 
-  /** Header 右側「最新資料」：取資料集中最新一期（state.periods 已排序），依程式計算取得，不寫死月份。 */
+  /** Header 右側「最新資料」：取資料集中最新一期（state.periods 已排序），依程式計算取得，不寫死月份；
+   * 與下方「資料月份」選單（目前查詢月份）為不同概念，故加上說明文字避免混淆。 */
   function renderHeaderMeta() {
     var latestPeriod = state.periods[state.periods.length - 1];
     var mkt = findMarket(latestPeriod);
     var latestEl = document.getElementById("header-latest-period");
-    if (latestEl) latestEl.textContent = "最新資料　民國" + (mkt ? periodShortLabel(mkt) : "—");
+    if (latestEl) {
+      latestEl.textContent = "最新資料　民國" + (mkt ? periodShortLabel(mkt) : "—");
+      latestEl.title = "本站目前可查詢的最新資料月份；若要切換查詢月份，請使用下方「資料月份」選單。";
+    }
     var updatedEl = document.getElementById("header-updated-date");
-    if (updatedEl) updatedEl.textContent = "更新日期：" + HEADER_UPDATED_AT_LABEL;
+    if (updatedEl) {
+      updatedEl.textContent = "網站更新日期：" + HEADER_UPDATED_AT_LABEL;
+      updatedEl.title = "本次網站內容最後更新日期，非金管會銀行局資料正式發布日。";
+    }
   }
 
   function renderMeta(period) {
@@ -3168,7 +3292,11 @@
   }
 
   /** 標題用銀行名稱：正式名稱去除「商業」（例：元大商業銀行→元大銀行）。 */
-  function bankTitleName(name) { return name.replace("商業銀行", "銀行"); }
+  /** 正式標題／匯出檔名用銀行名稱：遠銀固定顯示「遠東商銀」（不用「遠東國際銀行」），其餘銀行僅去除「商業」二字。 */
+  function bankTitleName(name) {
+    if (name === FAR_EASTERN_NAME) return "遠東商銀";
+    return name.replace("商業銀行", "銀行");
+  }
 
   /** 銀行固定視覺樣式（顏色＋線型＋點形）：僅依銀行官方名稱於固定名單中的位置決定，
    * 不受選取順序、排序、增減銀行或圖例隱藏／顯示影響，確保畫面、圖例、銀行概況與下載PNG一致。
@@ -3252,13 +3380,13 @@
   /** 同期變化文字：比率型為「較去年同期 ±X pp」，其餘為「YOY ±X%」。 */
   function customChangeText(metric, view) {
     if (!isFiniteNumber(view.yoy)) return "缺同期資料";
-    return metric.kind === "ratio" ? "較去年同期 " + signedPp(view.yoy) : "YOY " + signedPct(view.yoy);
+    return metric.kind === "ratio" ? "較去年同期 " + signedPp(view.yoy) : "YoY " + signedPct(view.yoy);
   }
 
   function customPType(metric, basis) { return metricSupportsPeriodType(metric) ? basis : "month"; }
 
   function customBasisTag(metric, basis) {
-    if (metricSupportsPeriodType(metric)) return basis === "ytd" ? "年初至今累計" : "單月";
+    if (metricSupportsPeriodType(metric)) return basis === "ytd" ? "YTD" : "單月";
     return metric.kind === "ratio" ? "當月值" : "月底值";
   }
 
@@ -3313,23 +3441,11 @@
     return periodsForRange(period, range, null, null);
   }
 
-  /** 分析期間說明文字：實際期間與月份數；資料不足時說明實際可用期間；截止月與資料月份不同時分別說明。 */
-  function rangeNoteText(period, range, cs, ce) {
-    var periods = resolveRange(period, range, cs, ce);
-    if (!periods.length) return "分析期間：無可用資料";
-    var n = periods.length;
-    var parts = ["分析期間：" + rocShort(periods[0]) + "－" + rocShort(periods[n - 1]) + "（共" + n + "個月）"];
-    var req = parseInt(range, 10);
-    if (isFiniteNumber(req) && n < req) parts.push("資料僅有 " + n + " 個月，已顯示可用期間");
-    if (periods[n - 1] !== period) {
-      parts.push("資料月份 " + periodShortLabel(findMarket(period)) + " 用於本期數值與排名；分析期間用於趨勢圖");
-    }
-    return parts.join("。");
-  }
-
   function setCustomMsg(id, text) {
     var el = document.getElementById(id);
-    if (el) el.textContent = text || "";
+    if (!el) return;
+    el.textContent = text || "";
+    el.hidden = !text;
   }
 
   function bankPeriods() {
@@ -3347,8 +3463,7 @@
     var periods = bankPeriods();
     var mkt = findMarket(period);
     titleEl.textContent = bankTitleName(cfg.name) + "｜信用卡業務概況";
-    if (metaEl) metaEl.textContent = "資料月份：" + (mkt ? "民國" + periodShortLabel(mkt) : "—") +
-      "｜趨勢期間：" + customRangeCaptionFor(periods);
+    if (metaEl) metaEl.textContent = "資料月份：" + (mkt ? "民國" + periodShortLabel(mkt) : "—");
     var rec = findIssuer(period, cfg.name);
     cardsEl.innerHTML = "";
     if (!rec) {
@@ -3373,7 +3488,6 @@
         '<div class="bank-card-head">' +
           '<h3 class="bank-card-name">' + escapeHtml(metric.label) + '</h3>' +
           '<span class="basis-tag">' + escapeHtml(customBasisTag(metric, cfg.basis)) + '</span>' +
-          '<button type="button" class="png-btn" data-card-png="' + id + '">下載 PNG</button>' +
         '</div>' +
         '<div class="bank-card-body">' +
           '<div class="bank-card-stats">' +
@@ -3546,26 +3660,6 @@
     });
   }
 
-  function exportBankCardPng(metricId) {
-    var card = document.querySelector('#bank-cards .bank-card[data-metric="' + metricId + '"]');
-    if (!card) return;
-    var svg = card.querySelector("svg.linechart-svg");
-    var metric = METRIC_CATALOG[metricId];
-    var cfg = customState.bank;
-    var periods = bankPeriods();
-    var mkt = findMarket(state.selectedPeriod);
-    var title = bankTitleName(cfg.name) + "｜" + metric.label;
-    var sub = [
-      "資料月份：民國" + (mkt ? periodShortLabel(mkt) : "—") + "｜趨勢期間：" + customRangeCaptionFor(periods),
-      "數據方式：" + customBasisTag(metric, cfg.basis) + "｜單位：" + customUnit(metric).unit,
-    ];
-    var footer = ["資料來源：金管會銀行局信用卡業務統計附表五（processed 標準資料）"];
-    composeCanvas(svg, { w: 1200, h: 620, title: title, titleSize: 30, subSize: 19, subtitleLines: sub, footer: footer }, function (canvas) {
-      downloadCanvasPng(canvas, "信用卡市場與同業分析_銀行概況_" + bankTitleName(cfg.name) + "_" + metric.label + "_" +
-        customBasisFile(metric, cfg.basis) + "_" + state.selectedPeriod + ".png");
-    });
-  }
-
   // ------------------------------------------------------------------
   // 多銀行指標比較
   // ------------------------------------------------------------------
@@ -3578,9 +3672,12 @@
   function cmpDefaultDraft() {
     var period = state.selectedPeriod;
     var banks = CMP_DEFAULT_BANKS.filter(function (n) { return !!findIssuer(period, n); });
+    var defaultCs = periodsForRange(period, "6", null, null)[0] || period;
+    // 預設同時顯示遠銀＋整體市場，兩者金額規模差距大，故預設「顯示」採YoY比較，避免金額同軸使遠銀曲線貼近零軸。
+    // 自訂比較頁固定採真實起訖月份（range 恆為 custom），起始月份預設往前6個月，不提供近6／近12個月預設按鈕。
     return {
-      metric: "purchase_amount", analysis: "trend", display: "value", basis: customState.bank.basis,
-      period: period, range: "6", cs: null, ce: null, banks: banks, marketTotal: true, title: "",
+      metric: "purchase_amount", analysis: "trend", display: "yoy", basis: customState.bank.basis,
+      period: period, range: "custom", cs: defaultCs, ce: period, banks: banks, marketTotal: true, title: "",
     };
   }
 
@@ -3618,15 +3715,19 @@
    */
   function cmpDefaultTitle(d) {
     var metric = METRIC_CATALOG[d.metric];
-    var basisWord = metricSupportsPeriodType(metric) ? (d.basis === "ytd" ? "YTD" : "單月") : "";
-    var what = d.display === "yoy" ? (metric.kind === "ratio" ? "同期差" : "年增率") : "";
+    var basisWord = metricSupportsPeriodType(metric) ? (d.basis === "ytd" ? "累計" : "單月") : "";
+    var what = d.display === "yoy" ? (metric.kind === "ratio" ? "同期差" : "YoY") : "";
+    var isLatin = what === "YoY";
     var short = METRIC_SHORT_NAMES[metric.id] || metric.label;
-    return [basisWord, short, what, "比較"].filter(Boolean).join("");
+    var head = [basisWord, short].filter(Boolean).join("");
+    if (!what) return head + "比較";
+    // 英文縮寫（YoY）與中文字之間加空格，避免黏在一起；中文詞（同期差）不加空格，維持原有可讀性。
+    return isLatin ? head + " " + what + " 比較" : head + what + "比較";
   }
 
-  /** 目前應顯示之標題：使用者自訂標題（customTitle）固定顯示；未自訂則用簡短自動標題。 */
+  /** 目前應顯示之標題：固定使用簡短自動標題（見 cmpDefaultTitle），不提供手動編輯。 */
   function cmpCurrentTitle(a) {
-    return a.customTitle || cmpDefaultTitle(a);
+    return cmpDefaultTitle(a);
   }
 
   /** 依畫面數據取得一列（銀行）之值與同期變化。 */
@@ -3648,7 +3749,7 @@
   /** 排名欄名稱：沿用指標既有本期值排名（30家銀行），依數據方式標示，避免被誤認為 YOY 排名。 */
   function cmpRankHeaderLabel(metric, basis) {
     var short = METRIC_SHORT_NAMES[metric.id] || metric.label;
-    var prefix = metricSupportsPeriodType(metric) ? (basis === "ytd" ? "YTD" : "單月") : "";
+    var prefix = metricSupportsPeriodType(metric) ? (basis === "ytd" ? "累計" : "單月") : "";
     return prefix + short + "排名（30家）";
   }
 
@@ -3672,11 +3773,11 @@
     total_assets: "金額",
   };
 
-  /** 顯示內容選項文字：例如「金額」「年增率（YoY）」「比率」「同期差（pp）」。 */
+  /** 顯示內容選項文字：例如「金額」「YoY」「較去年同期增減（pp）」。 */
   function cmpDisplaySelectLabel(metric, kind) {
     var short = CMP_DISPLAY_SHORT[metric.id] || metric.label;
     if (kind === "value") return short;
-    return metric.kind === "ratio" ? "同期差（pp）" : "年增率（YoY）";
+    return metric.kind === "ratio" ? "較去年同期增減（pp）" : "YoY";
   }
 
   /** 比較對象收合按鈕文字：已選則列出簡稱（過長時改為「已選N家銀行」），未選則提示請選擇。 */
@@ -3718,18 +3819,19 @@
     };
     setPressed("[data-cmp-analysis]", "data-cmp-analysis", d.analysis);
     setPressed("[data-cmp-basis]", "data-cmp-basis", d.basis);
-    setPressed("[data-cmp-range]", "data-cmp-range", d.range);
     var metricSel = document.getElementById("cmp-metric");
     if (metricSel) metricSel.value = d.metric;
     var isTrend = d.analysis === "trend";
     // 時間設定列僅於「歷月趨勢」顯示；「單一月份比較」沿用上方資料月份，不在篩選區重複顯示月份或說明文字。
+    // 本頁固定採真實起訖月份選擇（不提供近6／近12個月預設按鈕），僅顯示所選期間的總月份數。
     var timeRow = document.getElementById("cmp-time-row");
     if (timeRow) timeRow.hidden = !isTrend;
-    var isCustom = isTrend && d.range === "custom";
-    var customWrap = document.getElementById("cmp-custom-wrap");
     var rangeNoteEl = document.getElementById("cmp-range-note");
-    if (rangeNoteEl) { rangeNoteEl.hidden = isCustom; rangeNoteEl.textContent = isTrend ? rangeNoteText(d.period, d.range, d.cs, d.ce) : ""; }
-    if (customWrap) customWrap.hidden = !isCustom;
+    if (rangeNoteEl) rangeNoteEl.textContent = isTrend ? "共" + cmpPeriods(d).length + "個月" : "";
+    if (isTrend) {
+      fillRangeOptions(document.getElementById("cmp-custom-start"), d.cs);
+      fillRangeOptions(document.getElementById("cmp-custom-end"), d.ce);
+    }
     // 數據方式：指標不支援單月／YTD切換時（比率、存量型），以靜態文字取代切換鈕，明確顯示當月比率或月底值。
     var supportsBasis = metricSupportsPeriodType(metric);
     var basisSeg = document.getElementById("cmp-basis-seg");
@@ -3770,10 +3872,12 @@
     var list = document.getElementById("cmp-list");
     if (list) {
       var q = (document.getElementById("cmp-search") || { value: "" }).value.trim();
-      var names = customBankList(d.period);
+      var names = customBankList(d.period).filter(function (name) { return bankNameMatches(name, q); });
       list.innerHTML = "";
+      if (q && !names.length) {
+        list.innerHTML = '<p class="scope-note">找不到符合「' + escapeHtml(q) + '」的銀行，請試試銀行名稱或簡稱。</p>';
+      }
       names.forEach(function (name) {
-        if (q && name.indexOf(q) < 0 && bankShortName(name).indexOf(q) < 0) return;
         var checked = d.banks.indexOf(name) >= 0;
         var row = document.createElement("label");
         row.className = "cmp-list-row" + (name === FAR_EASTERN_NAME ? " is-far-eastern" : "") + (checked ? " is-selected" : "");
@@ -3794,39 +3898,35 @@
       var el = document.getElementById(id);
       if (el) el.disabled = blocked;
     });
-    var titleInput = document.getElementById("cmp-title-input");
-    if (titleInput && document.activeElement !== titleInput && !titleInput.dataset.userEdited) titleInput.value = cmpDefaultTitle(d);
   }
 
-  /** 更新圖表：將目前控制項套用為圖表條件（下載只使用已套用的圖表）。 */
+  /** 更新圖表：將目前控制項套用為圖表條件（下載只使用已套用的圖表）。標題固定為自動標題（見 cmpDefaultTitle）。 */
   function cmpApply() {
     var c = customState.cmp;
     if (!c.draft.banks.length && !c.draft.marketTotal) return;
-    var ti = document.getElementById("cmp-title-input");
-    var copy = JSON.parse(cmpSnapshot(c.draft));
-    // 僅使用者實際編輯過標題欄（input事件已設dataset.userEdited）才視為自訂標題並固定顯示；
-    // 未編輯時欄位雖有預設文字，仍應視為「自動標題」，依目前可見系列即時更新（見cmpCurrentTitle）。
-    copy.customTitle = (ti && ti.dataset.userEdited && ti.value.trim()) ? ti.value.trim() : "";
-    c.applied = copy;
+    c.applied = JSON.parse(cmpSnapshot(c.draft));
     c.hidden = {};
     renderCmpChart();
     renderCmpControls();
   }
 
-  /** 選擇條件後自動更新：條件目前有效才套用為圖表；尚未有效（如自訂起訖未齊、未選任何對象）時僅同步控制項顯示，
-   * 圖表維持上一次有效結果，下載按鈕則依cmpExportBlocked()停用，避免匯出舊結果或半套用狀態。 */
+  /** 選擇條件後自動更新：條件目前有效才套用為圖表；未選任何銀行或市場時視為「尚無比較對象」，
+   * 立即清除舊圖、圖例與明細（而非保留上次結果），避免殘留畫面與目前「未選取」狀態矛盾；
+   * 自訂起訖尚未齊備等其他暫時無效狀態，則維持上一次有效結果，下載按鈕依cmpExportBlocked()停用。 */
   function cmpMaybeApply() {
     var c = customState.cmp;
-    if (cmpDraftValid(c.draft)) cmpApply(); else renderCmpControls();
+    if (cmpDraftValid(c.draft)) { cmpApply(); return; }
+    if (!c.draft.banks.length && !c.draft.marketTotal) {
+      c.applied = null;
+      c.hidden = {};
+      renderCmpChart();
+    }
+    renderCmpControls();
   }
 
   function cmpSetDraft(patch) {
     var c = customState.cmp;
     Object.keys(patch).forEach(function (k) { c.draft[k] = patch[k]; });
-    if (patch.metric || patch.display || patch.analysis) {
-      var ti = document.getElementById("cmp-title-input");
-      if (ti) ti.dataset.userEdited = "";
-    }
     cmpMaybeApply();
   }
 
@@ -3933,16 +4033,16 @@
       .forEach(function (i) { showTickIdx[i] = true; });
     dom.ticks.forEach(function (t, ti) {
       var x = xOf(t);
-      el("line", { x1: x, x2: x, y1: padT - 6, y2: height - padB, stroke: "#E7ECF2", "stroke-width": 1 });
-      if (showTickIdx[ti]) el("text", { x: x, y: height - padB + 18, "font-size": tickFont, fill: "#6b7280", "text-anchor": "middle" }, tickTexts[ti]);
+      el("line", { x1: x, x2: x, y1: padT - 6, y2: height - padB, stroke: "var(--gridline)", "stroke-width": 1 });
+      if (showTickIdx[ti]) el("text", { x: x, y: height - padB + 18, "font-size": tickFont, fill: "var(--text-secondary)", "text-anchor": "middle" }, tickTexts[ti]);
     });
-    el("line", { x1: x0, x2: x0, y1: padT - 6, y2: height - padB, stroke: "#9AA3B0", "stroke-width": 1.2 });
+    el("line", { x1: x0, x2: x0, y1: padT - 6, y2: height - padB, stroke: "var(--baseline)", "stroke-width": 1.2 });
 
     rows.forEach(function (r, i) {
       var y = padT + i * rowH;
       var cy = y + rowH / 2;
       var label = truncateToWidth(r.label, nameW - (r.isFe ? 36 : 2), nameFont);
-      var nameEl = el("text", { x: 0, y: cy + 5, "font-size": nameFont, "font-weight": r.isFe ? 800 : 600, fill: "#173458" }, label);
+      var nameEl = el("text", { x: 0, y: cy + 5, "font-size": nameFont, "font-weight": r.isFe ? 800 : 600, fill: "var(--text-primary)" }, label);
       if (label !== r.label) { var titleEl = document.createElementNS(SVGNS, "title"); titleEl.textContent = r.label; nameEl.appendChild(titleEl); }
       if (r.isFe) {
         var bx = textWidthEstimate(label, nameFont) + 6;
@@ -3950,16 +4050,16 @@
         el("text", { x: bx + 14, y: cy + 3, "font-size": 11, "font-weight": 700, fill: "#ffffff", "text-anchor": "middle" }, "本行");
       }
       if (!isFiniteNumber(r.value)) {
-        el("text", { x: plotL, y: cy + 5, "font-size": 14, fill: "#8a8d96" }, "缺資料");
+        el("text", { x: plotL, y: cy + 5, "font-size": 14, fill: "var(--text-muted)" }, "缺資料");
         return;
       }
       var xv = xOf(r.value);
       var bx2 = Math.min(x0, xv), bw = Math.max(1, Math.abs(xv - x0));
-      var fill = opts.signed ? (r.value > 0 ? "#c8102e" : (r.value < 0 ? "#00803c" : "#8a8d96")) : bankColor(r.name);
+      var fill = opts.signed ? (r.value > 0 ? "var(--color-positive)" : (r.value < 0 ? "var(--color-negative)" : "var(--color-neutral)")) : bankColor(r.name);
       el("rect", { x: bx2, y: y + 7, width: bw, height: rowH - 14, rx: 3, fill: fill, "fill-opacity": 0.92 });
       var txt = fmtVal(r.value);
       var tx = r.value >= 0 ? xv + 8 : xv - 8;
-      var color = opts.signed ? (r.value > 0 ? "#c8102e" : (r.value < 0 ? "#00803c" : "#52545c")) : "#173458";
+      var color = opts.signed ? (r.value > 0 ? "var(--color-positive)" : (r.value < 0 ? "var(--color-negative)" : "var(--text-secondary)")) : "var(--text-primary)";
       el("text", {
         x: tx, y: cy + 5, "font-size": valFont, "font-weight": 800, fill: color,
         "text-anchor": r.value >= 0 ? "start" : "end",
@@ -3978,7 +4078,7 @@
     var subtitleEl = document.getElementById("cmp-subtitle");
     if (!wrap) return;
     if (!a) {
-      wrap.innerHTML = '<p class="scope-note">請先選擇比較對象，圖表將自動更新。</p>';
+      wrap.innerHTML = '<p class="scope-note">請勾選銀行以顯示比較結果。</p>';
       if (legendEl) legendEl.innerHTML = "";
       if (tableEl) tableEl.innerHTML = "";
       if (subtitleEl) subtitleEl.textContent = "";
@@ -3992,26 +4092,15 @@
     var vis = cmpVisibleBanks();
     if (titleEl) titleEl.textContent = cmpCurrentTitle(a);
     var periods = cmpPeriods(a);
-    // 精簡副標（例如「YTD簽帳金額年增率（%）・115/03－115/08」）：呈現指標、口徑、顯示內容與單位。
+    // 精簡副標（例如「YTD簽帳金額YoY（%）・115/03－115/08」）：呈現指標、口徑、顯示內容與單位。
     if (subtitleEl) {
-      var basisWord = metricSupportsPeriodType(metric) ? (a.basis === "ytd" ? "YTD" : "單月") : "";
+      var basisWord = metricSupportsPeriodType(metric) ? (a.basis === "ytd" ? "累計" : "單月") : "";
       var short = METRIC_SHORT_NAMES[metric.id] || metric.label;
-      var displayWord = a.display === "yoy" ? (isRatio ? "同期差" : "年增率") : "";
-      var mainLabel = [basisWord, short, displayWord].filter(Boolean).join("") + "（" + unit + "）";
+      var displayWord = a.display === "yoy" ? (isRatio ? "同期差" : "YoY") : "";
+      var head = [basisWord, short].filter(Boolean).join("");
+      var mainLabel = (displayWord ? (displayWord === "YoY" ? head + " YoY" : head + displayWord) : head) + "（" + unit + "）";
       var periodLabel = a.analysis === "month" ? "民國" + periodShortLabel(findMarket(a.period)) : customRangeCaptionFor(periods);
       subtitleEl.textContent = mainLabel + "・" + periodLabel;
-    }
-    // 日期規則說明（僅歷月趨勢顯示）：上方資料月份用於本期數值與排名，趨勢起訖僅用於控制曲線；
-    // 避免使用者誤以為圖表標示的趨勢期間終點即為摘要所用之本期月份。
-    var periodNoteEl = document.getElementById("cmp-period-note");
-    if (periodNoteEl) {
-      if (a.analysis === "trend") {
-        periodNoteEl.hidden = false;
-        periodNoteEl.textContent = "資料月份：民國" + periodShortLabel(findMarket(a.period)) + "（用於本期數值與排名）｜趨勢起訖僅控制曲線";
-      } else {
-        periodNoteEl.hidden = true;
-        periodNoteEl.textContent = "";
-      }
     }
 
     // 圖例（可點選隱藏／顯示）：僅在長條／線條顏色即為銀行識別色時顯示，避免圖例與長條顏色不符
@@ -4037,10 +4126,10 @@
           '<span class="cmp-legend-name">' + escapeHtml(bankShortName(name)) + '</span>';
         legendEl.appendChild(b);
       });
-      if (vis.length > 5) {
+      if (vis.length > 5 && showBankLegend) {
         var note = document.createElement("span");
         note.className = "scope-note";
-        note.textContent = "勾選銀行以顯示曲線，取消勾選即可隱藏。";
+        note.textContent = a.analysis === "trend" ? "勾選銀行以顯示曲線，取消勾選即可隱藏。" : "勾選銀行以顯示資料，取消勾選即可隱藏。";
         legendEl.appendChild(note);
       }
     }
@@ -4066,7 +4155,7 @@
       var series = vis.map(function (name) {
         return {
           label: bankShortName(name), color: bankColor(name),
-          dashed: bankDash(name), marker: bankMarker(name),
+          dashed: bankDash(name), marker: bankMarker(name), deltaColor: a.display === "yoy",
           values: periods.map(function (p) { return cmpPointValue(a, name, p); }),
           fmt: function (v) { return a.display === "yoy" ? (isRatio ? signedPp(v) : signedPct(v)) : customFmt(metric, v); },
         };
@@ -4074,10 +4163,29 @@
       if (!series.length || !periods.length) {
         wrap.innerHTML = '<p class="scope-note">目前沒有可顯示的銀行（已全部隱藏）或期間資料不足。</p>';
       } else {
+        // 最後一個月份直接標示各銀行數值（端點標示沿用既有防重疊邏輯），不必靠滑鼠移入才能看到結果。
         buildLineChart(wrap, periods, series, {
           height: 380, showLegend: false, breakAtNewYear: pType === "ytd", zeroBaseline: a.display === "yoy",
-          unit: unit, ariaLabel: cmpCurrentTitle(a),
+          unit: unit, ariaLabel: cmpCurrentTitle(a), endLabel: true,
         });
+        // 金額同軸顯示時，若所選銀行／市場規模差距過大，較小者曲線會被壓扁難以辨識成長變化；
+        // 不更動預設顯示方式，僅於圖表下方提示使用者可切換為YoY比較（須於buildLineChart之後附加，
+        // 避免被buildLineChart內部的wrapEl.innerHTML清空）。
+        if (a.display === "value" && !isRatio) {
+          var seriesMaxAbs = series.map(function (s) {
+            var vals = s.values.filter(isFiniteNumber).map(Math.abs);
+            return vals.length ? Math.max.apply(null, vals) : null;
+          }).filter(isFiniteNumber);
+          if (seriesMaxAbs.length >= 2) {
+            var scaleLo = Math.min.apply(null, seriesMaxAbs), scaleHi = Math.max.apply(null, seriesMaxAbs);
+            if (scaleLo > 0 && scaleHi / scaleLo >= 8) {
+              var scaleNote = document.createElement("p");
+              scaleNote.className = "scope-note";
+              scaleNote.textContent = "所選銀行／市場規模差距較大，金額同軸顯示時較小者曲線可能被壓扁；如需比較成長幅度，可將「顯示」切換為 YoY。";
+              wrap.appendChild(scaleNote);
+            }
+          }
+        }
       }
     }
 
@@ -4094,10 +4202,10 @@
         });
       }
       var endP = a.period;
-      var valHead = (a.display === "yoy" ? (isRatio ? "較去年同期（pp）" : "YOY（%）") : "原始數值（" + unit + "）");
+      var valHead = (a.display === "yoy" ? (isRatio ? "較去年同期（pp）" : "YoY（%）") : metric.label + "（" + unit + "）");
       var rankHead = cmpRankHeaderLabel(metric, a.basis);
       var html = '<table class="cmp-table"><thead><tr><th scope="col">銀行</th><th scope="col">' + escapeHtml(valHead) + '</th>' +
-        (a.display === "value" ? '<th scope="col">' + escapeHtml(isRatio ? "較去年同期（pp）" : "YOY（%）") + '</th>' : "") +
+        (a.display === "value" ? '<th scope="col">' + escapeHtml(isRatio ? "較去年同期（pp）" : "YoY（%）") + '</th>' : "") +
         '<th scope="col">' + escapeHtml(rankHead) + '</th></tr></thead><tbody>';
       tRows.forEach(function (r) {
         var yoyVal = a.display === "value" ? (function () { var v = metricView(metric, cmpRecordFor(endP, r.name), pType); return isFiniteNumber(v.yoy) ? v.yoy : null; })() : null;
@@ -4126,10 +4234,12 @@
     var vis = cmpVisibleBanks();
     var unit = cmpUnitLabel(metric, a.display);
     var periods = cmpPeriods(a);
-    var basisTxt = metricSupportsPeriodType(metric) ? (a.basis === "ytd" ? "年初至今累計" : "單月") : (metric.kind === "ratio" ? "當月值" : "月底值");
+    var basisTxt = metricSupportsPeriodType(metric) ? (a.basis === "ytd" ? "YTD" : "單月") : (metric.kind === "ratio" ? "當月值" : "月底值");
+    var scopeNames = vis.map(bankShortName);
     var sub = [
       a.analysis === "month" ? "資料月份：民國" + periodShortLabel(findMarket(a.period)) + "（單一月份比較）" : "分析期間：" + customRangeCaptionFor(periods) + "（歷月趨勢）",
-      "數據方式：" + basisTxt + "｜單位：" + unit + "｜顯示：" + (a.display === "yoy" ? (metric.kind === "ratio" ? "較去年同期變化（pp）" : "同期變化（YOY，%）") : "原始數值"),
+      "統計方式：" + basisTxt + "｜單位：" + unit + "｜顯示：" + (a.display === "yoy" ? (metric.kind === "ratio" ? "較去年同期變化（pp）" : "YoY（%）") : metric.label),
+      "比較對象：" + (scopeNames.length <= 6 ? scopeNames.join("、") : "共" + scopeNames.length + "項（詳見下方圖例）"),
     ];
     var legend = vis.map(function (name) {
       return {
@@ -4138,7 +4248,7 @@
         marker: a.analysis === "trend" ? bankMarker(name) : "circle",
       };
     });
-    var footer = ["資料來源：金管會銀行局信用卡業務統計附表五（processed 標準資料）", "僅顯示圖例中目前可見之銀行；排名母體為完整30家銀行。"];
+    var footer = ["資料來源：金管會銀行局信用卡業務統計附表五", "僅顯示圖例中目前可見之銀行；排名範圍為完整30家銀行。"];
     var hiddenNames = a.banks.filter(function (n) { return customState.cmp.hidden[n]; });
     if (hiddenNames.length) footer.push("已隱藏：" + hiddenNames.map(bankShortName).join("、"));
     composeCanvas(svg, { w: 1600, h: 900, title: cmpCurrentTitle(a), titleSize: 34, subSize: 22, subtitleLines: sub, legend: a.analysis === "trend" ? legend : [], footer: footer }, function (canvas) {
@@ -4196,10 +4306,12 @@
     var list = document.getElementById("bank-picker-list");
     if (list) {
       var q = (document.getElementById("bank-picker-search") || { value: "" }).value.trim();
-      var names = customBankList(state.selectedPeriod);
+      var names = customBankList(state.selectedPeriod).filter(function (name) { return bankNameMatches(name, q); });
       list.innerHTML = "";
+      if (q && !names.length) {
+        list.innerHTML = '<p class="scope-note">找不到符合「' + escapeHtml(q) + '」的銀行，請試試銀行名稱或簡稱。</p>';
+      }
       names.forEach(function (name) {
-        if (q && name.indexOf(q) < 0 && bankShortName(name).indexOf(q) < 0) return;
         var selected = name === cfg.name;
         var row = document.createElement("button");
         row.type = "button";
@@ -4231,6 +4343,7 @@
     if (customState.mode === "bank") {
       renderBankPicker();
       var cfgB = customState.bank;
+      cfgB.range = "custom";
       if (!cfgB.customStart) cfgB.customStart = (periodsForRange(state.selectedPeriod, "12", null, null)[0] || state.periods[0]);
       if (!cfgB.customEnd) cfgB.customEnd = state.selectedPeriod;
       fillRangeOptions(document.getElementById("bank-custom-start"), cfgB.customStart);
@@ -4239,18 +4352,9 @@
         var on = b.getAttribute("data-bank-basis") === cfgB.basis;
         b.classList.toggle("is-active", on); b.setAttribute("aria-pressed", on ? "true" : "false");
       });
-      document.querySelectorAll("[data-bank-range]").forEach(function (b) {
-        var on = b.getAttribute("data-bank-range") === cfgB.range;
-        b.classList.toggle("is-active", on); b.setAttribute("aria-pressed", on ? "true" : "false");
-      });
-      var isCustomB = cfgB.range === "custom";
-      var cust = document.getElementById("bank-custom-wrap");
-      if (cust) cust.hidden = !isCustomB;
+      // 自訂比較頁固定採真實起訖月份選擇（不提供近6／近12個月預設按鈕），僅顯示所選期間的總月份數。
       var bn = document.getElementById("bank-range-note");
-      if (bn) {
-        bn.hidden = isCustomB;
-        bn.textContent = rangeNoteText(state.selectedPeriod, cfgB.range, cfgB.customStart, cfgB.customEnd);
-      }
+      if (bn) bn.textContent = "共" + bankPeriods().length + "個月";
       renderBankOverview();
     } else {
       if (!customState.cmp.draft) customState.cmp.draft = cmpDefaultDraft();
@@ -4321,9 +4425,6 @@
       customState.bank.pickerOpen = false;
       renderCustomTab();
     });
-    document.querySelectorAll("[data-bank-range]").forEach(function (b) {
-      b.addEventListener("click", function () { customState.bank.range = b.getAttribute("data-bank-range"); renderCustomTab(); });
-    });
     document.querySelectorAll("[data-bank-basis]").forEach(function (b) {
       b.addEventListener("click", function () { customState.bank.basis = b.getAttribute("data-bank-basis"); renderCustomTab(); });
     });
@@ -4343,11 +4444,6 @@
     });
     bindTo("bank-print-btn", "click", function () { window.print(); });
     bindTo("bank-csv-btn", "click", function () { exportBankCsv(); });
-    var cards = document.getElementById("bank-cards");
-    if (cards) cards.addEventListener("click", function (e) {
-      var b = e.target.closest("[data-card-png]");
-      if (b) exportBankCardPng(b.getAttribute("data-card-png"));
-    });
 
     // 多銀行比較
     document.querySelectorAll("[data-cmp-analysis]").forEach(function (b) {
@@ -4356,9 +4452,6 @@
     bindTo("cmp-display-select", "change", function (e) { cmpSetDraft({ display: e.target.value }); });
     document.querySelectorAll("[data-cmp-basis]").forEach(function (b) {
       b.addEventListener("click", function () { cmpSetDraft({ basis: b.getAttribute("data-cmp-basis") }); });
-    });
-    document.querySelectorAll("[data-cmp-range]").forEach(function (b) {
-      b.addEventListener("click", function () { cmpSetDraft({ range: b.getAttribute("data-cmp-range") }); renderCustomTab(); });
     });
     bindTo("cmp-metric", "change", function (e) { cmpSetDraft({ metric: e.target.value }); });
     bindTo("cmp-custom-start", "change", function (e) {
@@ -4374,33 +4467,29 @@
       cmpSetDraft({ ce: e.target.value, cs: cs });
     });
     bindTo("cmp-search", "input", function () { renderCmpControls(); });
-    // 標題欄輸入：即時更新圖表標題（不呼叫cmpApply，避免每次輸入都重置圖例隱藏狀態）；清空欄位即還原自動標題。
-    bindTo("cmp-title-input", "input", function (e) {
-      var v = e.target.value;
-      e.target.dataset.userEdited = v.trim() ? "1" : "";
-      var c = customState.cmp;
-      if (c.applied) { c.applied.customTitle = v.trim(); renderCmpChart(); }
-    });
-    bindTo("cmp-title-edit-btn", "click", function () {
-      var row = document.getElementById("cmp-title-edit-row");
-      if (!row) return;
-      row.hidden = !row.hidden;
-      if (!row.hidden) {
-        var input = document.getElementById("cmp-title-input");
-        if (input) { input.focus(); input.select(); }
-      }
-    });
-    bindTo("cmp-title-reset-btn", "click", function () {
-      var input = document.getElementById("cmp-title-input");
-      if (input) { input.value = ""; input.dataset.userEdited = ""; }
-      var c = customState.cmp;
-      if (c.applied) { c.applied.customTitle = ""; renderCmpChart(); }
-    });
     bindTo("cmp-top12", "click", function () {
       var top = top12Banks(customState.cmp.draft.period).map(function (r) { return r.issuer_name; });
       cmpSetDraft({ banks: top });
     });
-    bindTo("cmp-clear", "click", function () { cmpSetDraft({ banks: [] }); });
+    // 全選：以目前搜尋結果（未搜尋時為全部30家銀行）為範圍，最多選取CMP_MAX家；超過上限時提示已縮減為前N家。
+    bindTo("cmp-select-all", "click", function () {
+      var d = customState.cmp.draft;
+      var q = (document.getElementById("cmp-search") || { value: "" }).value.trim();
+      var names = customBankList(d.period).filter(function (name) { return bankNameMatches(name, q); });
+      var selected = names.slice(0, CMP_MAX);
+      cmpSetDraft({ banks: selected });
+      var warn = document.getElementById("cmp-limit-msg");
+      if (warn) {
+        if (names.length > CMP_MAX) {
+          warn.textContent = "符合條件共 " + names.length + " 家，已選取前 " + CMP_MAX + " 家；如需調整，請先搜尋縮小範圍。";
+          warn.hidden = false;
+        } else {
+          warn.hidden = true;
+        }
+      }
+    });
+    // 「清除全部」依字面意義同時清空銀行與市場勾選，確保可真正回到「未選取」狀態並觸發空狀態提示。
+    bindTo("cmp-clear", "click", function () { cmpSetDraft({ banks: [], marketTotal: false }); });
     bindTo("cmp-market-total", "change", function () { cmpToggleMarketTotal(); });
     bindTo("cmp-bank-trigger", "click", function (e) {
       e.stopPropagation();
@@ -4506,7 +4595,6 @@
         bindOverviewRowActions();
         bindOverviewBasisSwitch();
         bindCustomTab();
-        bindStickyToggle();
         renderStickyBar();
         showPanels();
         renderAllTabs();
@@ -4556,7 +4644,9 @@
       diagSign: diagSign,
       diagItemHtml: diagItemHtml,
       peerSummaryPool: peerSummaryPool,
+      standardCompetitionRank: standardCompetitionRank,
       peerColumns: peerColumns,
+      peerScopeLabel: peerScopeLabel,
       peerSortFor: peerSortFor,
       filterPeerRows: filterPeerRows,
       peerGapText: peerGapText,
