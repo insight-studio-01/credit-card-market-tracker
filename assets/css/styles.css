@@ -580,6 +580,8 @@ td.ov-detail-link:focus-visible { outline: 2px solid var(--color-brand); outline
 
 /* ---------- v5：趨勢末端標示、診斷收合、遠銀橘色細線 ---------- */
 .chart-end-label { fill: var(--text-primary); font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; paint-order: stroke; stroke: var(--surface-1); stroke-width: 3px; stroke-linejoin: round; }
+/* 端點標籤為避免互疊而明顯挪動位置時的細引導線，連回原始資料點，顏色低調不搶過線條本身。 */
+.chart-end-leader { stroke: var(--text-muted); stroke-width: 1; stroke-dasharray: 2 2; opacity: 0.7; }
 .diagnosis-selected th[scope="row"] { text-align: left; }
 .diagnosis-selected td { text-align: right; font-weight: 600; }
 .diagnosis-selected .diag-note { text-align: left; font-size: 13px; color: var(--text-secondary); font-weight: 400; white-space: normal; }
@@ -671,9 +673,11 @@ h2, .section-title {
 .ov-yoy-label { font-size: 15px; font-weight: 600; color: var(--text-secondary); }
 .ov-rel-label { font-size: var(--fs-body); font-weight: 700; color: var(--text-primary); }
 .ov-rel-value { font-size: var(--fs-delta); font-weight: 800; margin-top: 2px; }
-.ov-rank-cell .ov-link-btn.ov-rank-main { font-size: var(--fs-value); font-weight: 800; color: var(--text-primary); line-height: 1.2; }
-.ov-rank-cell .ov-link-btn.ov-rank-main:hover { color: var(--series-fareast); }
+.ov-rank-cell .ov-rank-main { font-size: var(--fs-value); font-weight: 800; color: var(--text-primary); line-height: 1.2; }
 .ov-rank-sub { margin-top: 4px; font-size: 17px; }
+.ov-rank-goto { display: inline-block; margin-top: 6px; font: inherit; font-size: 14px; font-weight: 700; color: var(--color-brand); background: none; border: none; padding: 0; cursor: pointer; text-decoration: none; }
+.ov-rank-goto:hover { text-decoration: underline; }
+.ov-rank-goto:focus-visible { outline: 2px solid var(--color-brand); outline-offset: 2px; border-radius: 3px; }
 .ov-rank-change { font-size: 17px; font-weight: 700; }
 .ov-rank-change.delta-zero { font-weight: 600; }
 .ov-missing { font-size: 15px; color: var(--text-muted); font-weight: 500; }
@@ -708,7 +712,7 @@ h2, .section-title {
   :root { --fs-section: 20px; --fs-metric: 18px; --fs-th: 15px; --fs-value: 22px; --fs-delta: 19px; --fs-body: 16px; --fs-note: 14px; }
   h2, .section-title { font-size: var(--fs-section); }
   .overview-table tbody th[scope="row"], .overview-table tr.ov-group-row th.ov-group-th { font-size: var(--fs-metric); }
-  .ov-rank-cell .ov-link-btn.ov-rank-main { font-size: var(--fs-value); }
+  .ov-rank-cell .ov-rank-main { font-size: var(--fs-value); }
   .diagnosis-selected td.diag-result { font-size: var(--fs-delta); }
   .table-scroll { max-width: 100%; overflow-x: auto; }
 }
@@ -774,7 +778,7 @@ h2, .section-title {
 
 /* 黑色本期數值縮小，不壓過指標與變動數字 */
 .ov-main { font-size: var(--fs-value); font-weight: 700; }
-.ov-rank-cell .ov-link-btn.ov-rank-main { font-size: var(--fs-value); font-weight: 700; }
+.ov-rank-cell .ov-rank-main { font-size: var(--fs-value); font-weight: 700; }
 
 /* 數字與單位不拆行 */
 .ov-main, .ov-yoy-line, .ov-rel-value, .ov-rank-sub, .diag-result, .num, .peer-stat-value { white-space: nowrap; }
@@ -835,9 +839,9 @@ h2, .section-title {
 /* ==================================================================
    v8：自訂比較頁籤（銀行整體概況、多銀行指標比較）
    ================================================================== */
-.custom-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
-.custom-head h2 { border-bottom: none; padding-bottom: 0; margin: 0; }
-.custom-page-title { font-size: var(--fs-section); font-weight: 800; color: var(--text-primary); margin: 0; }
+/* 自訂比較不重複顯示頁面標題（上方導覽列已有「自訂比較」分頁），custom-head 僅容納模式切換按鈕，
+   置於內容區左上角。 */
+.custom-head { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 14px; }
 .mode-switch { display: inline-flex; border: 1px solid var(--baseline); border-radius: var(--radius-sm); overflow: hidden; background: var(--surface-1); }
 .mode-btn { font-family: inherit; font-size: 17px; font-weight: 700; padding: 9px 18px; border: none; background: none; color: var(--text-secondary); cursor: pointer; }
 .mode-btn.is-active { background: var(--color-brand-fill); color: #fff; }
@@ -854,6 +858,9 @@ h2, .section-title {
 .seg-btn { font-family: inherit; font-size: 16px; font-weight: 700; padding: 7px 12px; border: none; border-right: 1px solid var(--baseline); background: none; color: var(--text-secondary); cursor: pointer; }
 .seg-btn:last-child { border-right: none; }
 .seg-btn.is-active { background: var(--color-brand-fill); color: #fff; }
+/* 分析方式切換（歷月趨勢／當期比較）：圖示＋文字並列，圖示永遠跟隨按鈕文字色（currentColor），不使用額外顏色。 */
+.seg-btn-icon { display: inline-flex; align-items: center; gap: 6px; }
+.seg-icon { flex: 0 0 auto; display: block; }
 .ghost-btn { font-family: inherit; font-size: 16px; font-weight: 700; padding: 8px 14px; border-radius: var(--radius-sm); border: 1px solid var(--color-brand); background: var(--surface-1); color: var(--color-brand); cursor: pointer; }
 .ghost-btn:disabled { opacity: 0.45; cursor: not-allowed; }
 .primary-btn { font-family: inherit; font-size: 16px; font-weight: 700; padding: 9px 16px; border-radius: var(--radius-sm); border: 1px solid var(--color-brand-fill); background: var(--color-brand-fill); color: #fff; cursor: pointer; }
@@ -890,26 +897,56 @@ h2, .section-title {
 .cmp-right { margin-bottom: 0; }
 .ops-shared-row { display: flex; align-items: center; gap: 0; flex-wrap: wrap; }
 .ops-shared-row[hidden] { display: none; }
-.ops-shared-row + .ops-shared-row { margin-top: 16px; }
+.ops-shared-row + .ops-shared-row { margin-top: 12px; }
 .ops-shared-row > .ops-inline-field:first-child { flex: 1 1 340px; }
 .ops-shared-row > .ops-inline-field:last-child { flex: 1 1 260px; }
-/* 起訖月份列：兩個欄位視覺層級相同，不套用上面「首欄寬、末欄窄」的比例，改為等寬。 */
-.ops-shared-row.ops-range-row > .ops-inline-field { flex: 1 1 220px; }
+/* 起訖月份列：兩個欄位視覺層級相同，不套用上面「首欄寬、末欄窄」的比例，改為等寬；
+   日期欄位使用合理寬度即可，不隨列內剩餘空間一路拉長填滿整排（故不設 flex-grow）。 */
+.ops-shared-row.ops-range-row > .ops-inline-field { flex: 0 1 190px; }
 .ops-inline-field { display: flex; align-items: center; gap: 12px; min-width: 0; position: relative; }
+/* 個別欄位（而非整列）以 hidden 屬性隱藏時，需明確覆寫 display:flex，否則同特異度下 author stylesheet
+   會蓋過瀏覽器內建的 [hidden]{display:none}，造成欄位看起來被隱藏卻仍佔位（見 .filter-field[hidden] 同類修正）。 */
+.ops-inline-field[hidden], .ops-row-divider[hidden] { display: none; }
 .ops-inline-label { flex: 0 0 auto; min-width: 70px; font-size: 15px; font-weight: 700; color: var(--text-secondary); white-space: nowrap; }
-.ops-row-divider { width: 1px; align-self: stretch; background: var(--border-hairline); margin: 2px 28px; }
+.ops-row-divider { width: 1px; align-self: stretch; background: var(--border-hairline); margin: 2px 18px; }
 .ops-bank-field .ops-bank-trigger { flex: 1 1 auto; min-width: 0; }
+/* 第一排「選擇銀行｜統計方式」各佔約一半寬度，分隔線落在整排正中央：兩欄 flex-basis 皆為0、
+   flex-grow 皆為1，扣掉中間分隔線（含左右margin）的固定寬度後平分剩餘空間，兩種模式共用同一規則。
+   統計方式欄位以 id 選擇器（特異度高於 :last-child）覆寫，確保不受原本「首欄寬、末欄窄」比例影響，
+   避免單月／YTD按鈕因欄位過寬而橫跨過大空間。 */
+.ops-shared-row > .ops-inline-field.ops-bank-field { flex: 1 1 0; }
+#bank-basis-wrap, #cmp-basis-wrap { flex: 1 1 0; }
 /* min-width須給足夠值，避免未選取時按鈕文字（如「請選擇銀行」）較短，使欄位依內容縮小寬度 */
 .ops-bank-trigger-col { display: flex; flex-direction: column; gap: 2px; flex: 1 1 auto; min-width: 220px; }
 .cmp-count { font-size: 13px; font-weight: 600; color: var(--text-secondary); white-space: nowrap; }
 .ops-basis-static { font-weight: 700; color: var(--text-primary); }
-/* 自訂比較頁的「起始月份／結束月份」說明文字（共N個月）沿用一般 filter-note 樣式，不需額外規則。 */
+/* 比較方式（歷月趨勢／當期比較）置於圖表區上方的 .cmp-content-toolbar 內，只取內容寬度，不橫跨整排。 */
+.ops-analysis-field .seg.filter-control.ops-seg-compact { width: auto; }
+/* 「共N個月」緊接在日期欄位後方，與結束月份選單保留至少12px間距，不另外切出獨立區塊或分隔線；
+   空間不足時隨 .ops-shared-row 的 flex-wrap 自然換行，不會貼住選單的下拉箭頭。 */
+/* 選擇器須為 .filter-note.ops-range-note-inline（雙class）：單純 .ops-range-note-inline 與後方
+   .filter-note{margin:0}（同為單一class，但宣告順序在後）特異度相同，會被覆蓋回margin:0，
+   導致間距沒有實際套用；提高特異度後才能穩定保留與結束月份選單的間距。 */
+.filter-note.ops-range-note-inline { flex: 0 0 auto; white-space: nowrap; margin-left: 14px; }
 @media (max-width: 780px) {
   .ops-row-divider { display: none; }
   .ops-shared-row { flex-direction: column; align-items: stretch; gap: 14px; }
   .ops-shared-row > .ops-inline-field:first-child, .ops-shared-row > .ops-inline-field:last-child { flex: 1 1 auto; }
   /* 直向堆疊時 flex-basis 會變成高度而非寬度，起訖月份列兩欄位（含非首尾的中間欄位）一律改回 auto 高度，避免中間欄位被撐出大片留白。 */
   .ops-shared-row.ops-range-row > .ops-inline-field { flex: 1 1 auto; }
+  /* 統計方式欄位在桌機以 id 選擇器設為 flex:1 1 0（與選擇銀行各半寬），特異度高於上面的
+     :first-child／:last-child 手機版規則，故需在此以相同 id 選擇器明確改回 auto，直向堆疊時才不會
+     因 flex-basis:0 被當成高度基準，導致欄位高度計算異常。 */
+  #bank-basis-wrap, #cmp-basis-wrap { flex: 1 1 auto; }
+  /* 圖表專用工具列（比較方式／指標／比較內容）在手機版同樣逐欄堆疊，避免標籤、選單與按鈕互相擠在一起。 */
+  .cmp-content-toolbar { flex-direction: column; align-items: stretch; gap: 14px; }
+  .cmp-content-toolbar > .ops-inline-field { flex: 1 1 auto; min-width: 0; }
+  /* 比較方式（含圖示＋4字文字）：.seg 本身高度固定為44px且overflow:hidden，若被旁邊的「比較方式」標籤
+     擠壓到低於兩個按鈕所需的內容寬度，第二個按鈕會換行後被裁切看不見（已實測發現此問題）。
+     flex-shrink:0 讓 .seg 維持內容所需寬度不被壓縮；放不下時改由外層欄位（ops-inline-field）
+     自己換行，讓標籤與按鈕群組分成兩行，而不是把按鈕壓到看不見。 */
+  .cmp-content-toolbar .ops-analysis-field { flex-wrap: wrap; }
+  .ops-analysis-field .seg.filter-control.ops-seg-compact { flex-shrink: 0; }
 }
 .cmp-quick { display: flex; gap: 8px; flex-wrap: wrap; }
 .cmp-list { overflow-y: auto; padding: 4px 0; }
@@ -957,9 +994,15 @@ h2, .section-title {
 .cmp-right-head { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 10px; }
 .cmp-title-wrap { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; min-width: 0; }
 .cmp-actions { display: flex; gap: 10px; flex-wrap: wrap; }
-/* 多銀行比較專屬工具列（比較方式／指標／顯示）：位於結果標題下方、圖表上方。 */
-.cmp-content-toolbar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px 24px; margin: 10px 0 14px; padding: 12px 14px; background: var(--page-plane); border-radius: var(--radius-sm); }
-.cmp-content-toolbar .filter-field { min-width: 170px; }
+/* 圖表專用設定（比較方式／指標／比較內容）：置於圖表區上方、結果標題下方的獨立工具列，
+   與上方「選擇銀行｜統計方式」「起訖月份」等基本控制區分開，避免全部擠在最上方控制區。
+   沿用與基本控制區相同的「標籤在左、控制項在右」視覺語言，維持全站一致的排列邏輯。 */
+.cmp-content-toolbar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 14px 28px;
+  margin: 14px 0; padding: 12px 14px; background: var(--page-plane); border-radius: var(--radius-sm);
+}
+.cmp-content-toolbar .ops-inline-field { flex: 0 1 auto; }
+.cmp-content-toolbar #cmp-metric { min-width: 200px; }
 /* 數據與排名改為收合，預設收起，減少圖表下方長表格佔用版面。 */
 .cmp-table-details { margin-top: 10px; }
 .cmp-table-details > summary { cursor: pointer; font-weight: 700; color: var(--color-brand); padding: 8px 0; list-style: none; }
@@ -1035,12 +1078,6 @@ table.sr-only { display: block; width: 1px; height: 1px; overflow: hidden; }
 /* ==================================================================
    v9：自訂比較篩選區固定欄位（標籤在上、控制項同高、說明區固定高度）
    ================================================================== */
-.filter-field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
-/* R02修正：.filter-field的display:flex與[hidden]的UA預設display:none同為單一class/屬性選擇器，特異度相同，
-   後定義的本規則會覆蓋[hidden]，導致JS設定hidden後元素仍顯示（例如比率型指標時cmp-basis-wrap仍可操作）；
-   明確還原[hidden]應隱藏的行為，不影響未加hidden屬性之既有版面。 */
-.filter-field[hidden] { display: none; }
-.filter-field .ctl-label { display: block; height: 22px; line-height: 22px; font-size: 15px; font-weight: 700; color: var(--text-secondary); white-space: nowrap; }
 .filter-control { height: 44px; box-sizing: border-box; width: 100%; }
 .filter-control.seg { display: flex; width: 100%; height: 44px; }
 /* 同R02修正：.filter-control.seg（兩個class，特異度高於單一[hidden]屬性）會覆蓋[hidden]應隱藏的效果
@@ -1116,8 +1153,7 @@ table.sr-only { display: block; width: 1px; height: 1px; overflow: hidden; }
 
 /* 排名：次要資訊，但可讀 */
 .ov-rank-cell { text-align: center; }
-.ov-rank-cell .ov-link-btn.ov-rank-main { font-size: 18px; font-weight: 700; color: var(--text-primary); }
-.ov-rank-cell .ov-link-btn.ov-rank-main:hover { text-decoration: underline; color: var(--series-fareast); }
+.ov-rank-cell .ov-rank-main { font-size: 18px; font-weight: 700; color: var(--text-primary); }
 .ov-rank-sub { margin-top: 2px; font-size: 15px; }
 .ov-rank-change { font-size: 15px; font-weight: 700; }
 .ov-missing { font-size: 14px; color: var(--text-muted); font-weight: 600; }
@@ -1161,7 +1197,7 @@ table.sr-only { display: block; width: 1px; height: 1px; overflow: hidden; }
 .overview-table tbody th[scope="row"] { white-space: normal; }
 
 /* 排名：次要資訊 */
-.ov-rank-cell .ov-link-btn.ov-rank-main { color: var(--color-brand); font-size: 17px; font-weight: 700; }
+.ov-rank-cell .ov-rank-main { color: var(--color-brand); font-size: 17px; font-weight: 700; }
 .ov-rank-sub { font-size: 15px; }
 .ov-rank-change.delta-pos { color: var(--color-positive); }
 .ov-rank-change.delta-neg { color: var(--color-negative); }
@@ -1270,6 +1306,16 @@ table.sr-only { display: block; width: 1px; height: 1px; overflow: hidden; }
   .scope-btn { font-size: 14px; padding: 7px 8px; }
   .scope-switch { flex-wrap: wrap; overflow: visible; width: 100%; }
   .scope-btn { flex: 1 1 auto; }
+  /* 橫向捲動時，排名與銀行名稱固定於左側，避免捲動後認不出是哪一家銀行的資料。 */
+  .peers-table th.col-rank, .peers-table td.col-rank-cell,
+  .peers-table th.col-name, .peers-table td.col-name {
+    position: sticky; left: 0; background: var(--surface-1); z-index: 1;
+  }
+  .peers-table th.col-rank, .peers-table td.col-rank-cell { left: 0; box-shadow: 1px 0 0 var(--gridline); }
+  .peers-table th.col-name, .peers-table td.col-name { left: 84px; box-shadow: 1px 0 0 var(--gridline); }
+  .peers-table tbody tr.is-far-eastern td.col-rank-cell, .peers-table tbody tr.is-far-eastern td.col-name {
+    background: color-mix(in srgb, var(--series-fareast) 10%, var(--surface-1));
+  }
 }
 
 /* v18：整體市場（總計）勾選列；查看其他指標表欄間距（避免相鄰欄位視覺黏在一起） */

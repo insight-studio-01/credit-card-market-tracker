@@ -661,11 +661,14 @@ test("摘要結構：結論加粗於第一行，支持數字包於獨立區塊�
   assert.ok(line.html.indexOf('<span class="nowrap') >= 0, "數字需用 nowrap 包住");
 });
 
-test("摘要依口徑標示：單月與年初至今累計文字隨候選口徑變化", function () {
+test("摘要依口徑標示：以簡短YTD／單月徽章標示一次，不在支持文字重複冗長中文口徑詞", function () {
   const monthItem = app.homeSummaryPick([fakeCand("purchase_amount", { pType: "month", gap: -1, feV: { yoy: -1 }, mktV: { yoy: 1 } })])[0];
-  assert.ok(app.homeSummaryLine(monthItem).html.indexOf("（單月）") >= 0);
+  const monthHtml = app.homeSummaryLine(monthItem).html;
+  assert.ok(monthHtml.indexOf('<span class="ov-basis-tag">單月</span>') >= 0, monthHtml);
   const ytdItem = app.homeSummaryPick([fakeCand("purchase_amount", { pType: "ytd", gap: -1, feV: { yoy: -1 }, mktV: { yoy: 1 } })])[0];
-  assert.ok(app.homeSummaryLine(ytdItem).html.indexOf("（年初至今累計）") >= 0);
+  const ytdHtml = app.homeSummaryLine(ytdItem).html;
+  assert.ok(ytdHtml.indexOf('<span class="ov-basis-tag">YTD</span>') >= 0, ytdHtml);
+  assert.ok(ytdHtml.indexOf("（年初至今累計）") < 0, "支持文字不應再重複一次「年初至今累計」");
 });
 
 console.log("TestSameBankGapChange");

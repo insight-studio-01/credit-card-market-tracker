@@ -316,15 +316,15 @@
   <!-- ===================== 自訂比較 ===================== -->
   <section class="tab-panel" id="tab-custom" role="tabpanel" hidden>
     <div class="custom-head">
-      <h2 class="custom-page-title">自訂比較</h2>
       <div class="mode-switch" role="group" aria-label="比較模式">
-        <button type="button" class="mode-btn is-active" data-custom-mode="bank" aria-pressed="true">銀行整體概況</button>
+        <button type="button" class="mode-btn is-active" data-custom-mode="bank" aria-pressed="true">單一銀行概況</button>
         <button type="button" class="mode-btn" data-custom-mode="compare" aria-pressed="false">多銀行指標比較</button>
       </div>
     </div>
 
     <div id="custom-bank-mode">
       <div class="panel custom-controls ops-shared-panel" id="bank-controls">
+        <!-- 第一排：選擇銀行＋統計方式 -->
         <div class="ops-shared-row">
           <div class="ops-inline-field ops-bank-field">
             <span class="ops-inline-label" id="bank-picker-label">選擇銀行</span>
@@ -342,7 +342,7 @@
             </div>
           </div>
           <div class="ops-row-divider" aria-hidden="true"></div>
-          <div class="ops-inline-field">
+          <div class="ops-inline-field" id="bank-basis-wrap">
             <span class="ops-inline-label" id="bank-basis-label">統計方式</span>
             <div class="seg filter-control" role="group" aria-labelledby="bank-basis-label">
               <button type="button" class="seg-btn" data-bank-basis="month" aria-pressed="false">單月</button>
@@ -351,6 +351,7 @@
           </div>
         </div>
 
+        <!-- 第二排：時間 -->
         <div class="ops-shared-row ops-range-row">
           <div class="ops-inline-field">
             <span class="ops-inline-label" id="bank-start-label">起始月份</span>
@@ -361,8 +362,7 @@
             <span class="ops-inline-label" id="bank-end-label">結束月份</span>
             <select id="bank-custom-end" class="ctl-select filter-control" aria-labelledby="bank-end-label"></select>
           </div>
-          <div class="ops-row-divider" aria-hidden="true"></div>
-          <span class="filter-note" id="bank-range-note"></span>
+          <span class="filter-note ops-range-note-inline" id="bank-range-note"></span>
         </div>
         <p class="filter-note custom-range-msg" id="bank-custom-msg" aria-live="polite" hidden></p>
       </div>
@@ -385,6 +385,7 @@
 
     <div id="custom-compare-mode" hidden>
       <div class="panel cmp-filters ops-shared-panel">
+        <!-- 第一排：選擇銀行＋統計方式（與單一銀行概況同一結構與位置） -->
         <div class="ops-shared-row">
           <div class="ops-inline-field ops-bank-field">
             <span class="ops-inline-label" id="cmp-bank-label">選擇銀行</span>
@@ -392,7 +393,6 @@
               <button type="button" class="ctl-select filter-control ops-bank-trigger" id="cmp-bank-trigger" aria-expanded="false" aria-haspopup="true" aria-labelledby="cmp-bank-label">
                 <span id="cmp-bank-trigger-text">請選擇銀行</span>
               </button>
-              <span class="cmp-count" id="cmp-count"></span>
             </div>
             <div class="cmp-bank-popover" id="cmp-bank-popover" hidden>
               <div class="cmp-bank-popover-head">
@@ -425,18 +425,18 @@
           </div>
         </div>
 
+        <!-- 第二排：時間（與單一銀行概況同一結構；圖表專屬的比較方式／指標／顯示內容移至圖表區上方） -->
         <div class="ops-shared-row ops-range-row" id="cmp-time-row">
-          <div class="ops-inline-field">
+          <div class="ops-inline-field" id="cmp-start-field">
             <span class="ops-inline-label" id="cmp-start-label">起始月份</span>
             <select id="cmp-custom-start" class="ctl-select filter-control" aria-labelledby="cmp-start-label"></select>
           </div>
-          <div class="ops-row-divider" aria-hidden="true"></div>
+          <div class="ops-row-divider" id="cmp-start-divider" aria-hidden="true"></div>
           <div class="ops-inline-field">
             <span class="ops-inline-label" id="cmp-end-label">結束月份</span>
             <select id="cmp-custom-end" class="ctl-select filter-control" aria-labelledby="cmp-end-label"></select>
           </div>
-          <div class="ops-row-divider" aria-hidden="true"></div>
-          <span class="filter-note" id="cmp-range-note"></span>
+          <span class="filter-note ops-range-note-inline" id="cmp-range-note"></span>
         </div>
         <p class="filter-note custom-range-msg" id="cmp-custom-msg" aria-live="polite" hidden></p>
       </div>
@@ -452,21 +452,37 @@
           </div>
         </div>
 
+        <!-- 圖表專用設定：比較方式／指標／比較內容，置於圖表區上方，不與上方基本控制區混在一起 -->
         <div class="cmp-content-toolbar">
-          <div class="filter-field">
-            <span class="ctl-label" id="cmp-analysis-label">比較方式</span>
-            <div class="seg filter-control" role="group" aria-labelledby="cmp-analysis-label">
-              <button type="button" class="seg-btn" data-cmp-analysis="trend" aria-pressed="false">歷月趨勢</button>
-              <button type="button" class="seg-btn" data-cmp-analysis="month" aria-pressed="false">單一月份比較</button>
+          <div class="ops-inline-field ops-analysis-field">
+            <span class="ops-inline-label">比較方式</span>
+            <div class="seg filter-control ops-seg-compact ops-seg-icon" role="group" aria-label="比較方式">
+              <button type="button" class="seg-btn seg-btn-icon" data-cmp-analysis="trend" aria-pressed="false">
+                <svg class="seg-icon" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true" focusable="false">
+                  <polyline points="1,13 5,8 8,10 15,2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>歷月趨勢</span>
+              </button>
+              <button type="button" class="seg-btn seg-btn-icon" data-cmp-analysis="rank" aria-pressed="false">
+                <svg class="seg-icon" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true" focusable="false">
+                  <rect x="1" y="9" width="4" height="6" rx="0.5" fill="none" stroke="currentColor" stroke-width="1.4"/>
+                  <rect x="6.5" y="5" width="4" height="10" rx="0.5" fill="none" stroke="currentColor" stroke-width="1.4"/>
+                  <rect x="12" y="2" width="3" height="13" rx="0.5" fill="none" stroke="currentColor" stroke-width="1.4"/>
+                </svg>
+                <span>當期比較</span>
+              </button>
             </div>
           </div>
-          <div class="filter-field">
-            <label class="ctl-label" for="cmp-metric">指標</label>
+          <div class="ops-inline-field">
+            <label class="ops-inline-label" for="cmp-metric">指標</label>
             <select id="cmp-metric" class="ctl-select filter-control"></select>
           </div>
-          <div class="filter-field">
-            <label class="ctl-label" for="cmp-display-select">顯示</label>
-            <select id="cmp-display-select" class="ctl-select filter-control"></select>
+          <div class="ops-inline-field">
+            <span class="ops-inline-label" id="cmp-display-label">比較內容</span>
+            <div class="seg filter-control ops-seg-compact" id="cmp-display-seg" role="group" aria-labelledby="cmp-display-label">
+              <button type="button" class="seg-btn" data-cmp-display="value" aria-pressed="false"></button>
+              <button type="button" class="seg-btn" data-cmp-display="yoy" aria-pressed="false"></button>
+            </div>
           </div>
         </div>
 
