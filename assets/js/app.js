@@ -2866,17 +2866,114 @@
     });
   }
 
+  /** 行動裝置判定：iOS／Android UA，另涵蓋 iPadOS 13+ 偽裝成 Mac 的情況（觸控點>1）。 */
+  function isMobileDevice() {
+    var ua = (navigator.userAgent || "");
+    if (/iPhone|iPad|iPod|Android/i.test(ua)) return true;
+    if (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1) return true;
+    return false;
+  }
+
+  var exportToastTimer = null;
+
+  /** 匯出備援提示：顯示可點擊的開啟連結與操作說明，取代「點擊無反應」的靜默失敗。 */
+  function showExportToast(filename, url, hintExtra) {
+    if (exportToastTimer) { clearTimeout(exportToastTimer); exportToastTimer = null; }
+    var el = document.getElementById("export-toast");
+    if (!el) {
+      el = document.createElement("div");
+      el.id = "export-toast";
+      el.className = "export-toast";
+      el.setAttribute("role", "status");
+      el.setAttribute("aria-live", "polite");
+      document.body.appendChild(el);
+    }
+    el.innerHTML = "";
+    var msg = document.createElement("p");
+    msg.className = "export-toast-msg";
+    msg.textContent = "檔案已產生：" + filename;
+    var link = document.createElement("a");
+    link.className = "export-toast-link";
+    link.href = url;
+    link.download = filename;
+    link.target = "_blank";
+    link.rel = "noopener";
+    link.textContent = "點此開啟／儲存檔案";
+    var hint = document.createElement("p");
+    hint.className = "export-toast-hint";
+    hint.textContent = hintExtra || "若未自動下載，開啟後請點選瀏覽器選單或分享圖示，選擇「儲存至檔案」或「儲存影像」。";
+    var closeBtn = document.createElement("button");
+    closeBtn.type = "button";
+    closeBtn.className = "export-toast-close";
+    closeBtn.setAttribute("aria-label", "關閉提示");
+    closeBtn.textContent = "×";
+    closeBtn.addEventListener("click", function () { hideExportToast(url); });
+    link.addEventListener("click", function () {
+      exportToastTimer = setTimeout(function () { hideExportToast(url); }, 2000);
+    });
+    el.appendChild(closeBtn);
+    el.appendChild(msg);
+    el.appendChild(link);
+    el.appendChild(hint);
+    el.hidden = false;
+    exportToastTimer = setTimeout(function () { hideExportToast(url); }, 20000);
+  }
+
+  function hideExportToast(url) {
+    if (exportToastTimer) { clearTimeout(exportToastTimer); exportToastTimer = null; }
+    var el = document.getElementById("export-toast");
+    if (el) el.hidden = true;
+    if (url) { try { URL.revokeObjectURL(url); } catch (e) { /* 已釋放則忽略 */ } }
+  }
+
+  /**
+   * 統一檔案交付流程：桌機維持 <a download> 立即下載；行動裝置優先呼叫
+   * Web Share API（可直接分享／儲存檔案），不支援時改為顯示可點擊連結＋操作提示，
+   * 避免手機上「點擊無反應、無提示」的靜默失敗。
+   */
+  function deliverFile(blob, filename, mimeType) {
+    var url;
+    try {
+      url = URL.createObjectURL(blob);
+    } catch (e) {
+      showExportToast(filename, "", "此瀏覽器不支援直接下載，請改用電腦版瀏覽器開啟本頁，或以截圖保存目前畫面。");
+      return;
+    }
+    if (!isMobileDevice()) {
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+      return;
+    }
+    var canShareFiles = false;
+    try {
+      if (navigator.canShare && window.File) {
+        var file = new File([blob], filename, { type: mimeType });
+        canShareFiles = navigator.canShare({ files: [file] });
+        if (canShareFiles) {
+          navigator.share({ files: [file] }).then(function () {
+            setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+          }).catch(function (err) {
+            if (err && err.name === "AbortError") {
+              URL.revokeObjectURL(url);
+              return;
+            }
+            showExportToast(filename, url);
+          });
+        }
+      }
+    } catch (e) { canShareFiles = false; }
+    if (!canShareFiles) showExportToast(filename, url);
+  }
+
   function downloadCsv(filename, lines) {
     var csv = "﻿" + lines.join("\r\n");
     var blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    deliverFile(blob, filename, "text/csv;charset=utf-8;");
   }
 
   /** 匯出市場總覽：與畫面相同之八項指標、相同數據方式（發卡與消費指標依所選單月／YTD），欄位與畫面一致。 */
@@ -3609,14 +3706,11 @@
 
   function downloadCanvasPng(canvas, filename) {
     canvas.toBlob(function (blob) {
-      var url = URL.createObjectURL(blob);
-      var a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+      if (!blob) {
+        showExportToast(filename, "", "圖片產生失敗，請改用電腦版瀏覽器重試，或以截圖保存目前畫面。");
+        return;
+      }
+      deliverFile(blob, filename, "image/png");
     }, "image/png");
   }
 

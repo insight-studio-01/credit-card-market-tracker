@@ -1371,3 +1371,26 @@ h2, .section-title { padding-bottom: 6px; }
   .filter-control, .filter-control.seg, .filter-note,
   .custom-range-row .ctl-select, .custom-range-row .filter-note { height: 38px; min-height: 38px; }
 }
+
+/* ================================================================
+   行動裝置匯出備援提示（CSV／PNG 無法直接下載時顯示）
+   ================================================================ */
+.export-toast {
+  position: fixed; left: 50%; bottom: 16px; transform: translateX(-50%);
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  z-index: 100; width: calc(100% - 32px); max-width: 420px;
+  background: var(--surface-1); border: 1px solid var(--border-hairline); border-radius: var(--radius-md);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.22); padding: 14px 40px 14px 16px;
+}
+.export-toast[hidden] { display: none; }
+.export-toast-msg { margin: 0 0 6px; font-size: 14px; font-weight: 600; color: var(--text-primary); }
+.export-toast-link {
+  display: inline-block; margin: 0 0 6px; padding: 8px 14px; border-radius: var(--radius-sm);
+  background: var(--color-brand); color: #fff; font-size: 14px; font-weight: 600; text-decoration: none;
+}
+.export-toast-link:active { opacity: 0.85; }
+.export-toast-hint { margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--text-secondary); }
+.export-toast-close {
+  position: absolute; top: 6px; right: 8px; width: 28px; height: 28px; border: none; background: transparent;
+  color: var(--text-muted); font-size: 20px; line-height: 1; cursor: pointer;
+}
