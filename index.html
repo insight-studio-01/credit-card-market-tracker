@@ -163,41 +163,10 @@
           </article>
         </div>
 
-        <h2 class="section-title" id="diagnosis-title">遠銀表現診斷</h2>
+        <h2 class="section-title" id="diagnosis-title">趨勢重點</h2>
         <p class="diagnosis-subtitle" id="diagnosis-subtitle"></p>
         <div class="diagnosis-summary" id="diagnosis-summary"></div>
         <div class="diag-board" id="diagnosis-selected-grid"></div>
-        <details class="methodology-details diagnosis-methodology" id="diagnosis-methodology">
-          <summary>計算說明</summary>
-          <ul class="methodology-list">
-            <li>年度變化：本期 ÷ 去年同期（或去年同月）− 1，單位為 %；比率型指標為本期比率 − 去年同期比率，單位為 pp。</li>
-            <li>YTD：自當年 1 月起累計；比較基準為去年同期累計。僅發卡數與簽帳金額依所選數據方式呈現單月或 YTD；流通卡每卡簽帳金額＝所選期間（單月或 YTD）簽帳金額÷當月流通卡數，不直接加總各月每卡金額。</li>
-            <li>流通卡數、有效卡數、有效卡率及信用卡應收帳款為當月（月底）值，不累加，不計算 YTD。</li>
-            <li>YoY 差距（遠銀－市場）：遠銀年度變化減市場年度變化，單位為 pp，正值表示超前市場、負值表示落後市場。</li>
-            <li>市占率變化：本期市占率減去年同期市占率，單位為 pp。</li>
-            <li>排名變化：去年同期銀行排名減本期銀行排名，正值表示上升（名次數字變小）；排名範圍為全部 30 家銀行。</li>
-          </ul>
-        </details>
-        <details class="other-metrics-details" id="other-metrics-details">
-          <summary>查看其他指標</summary>
-          <p class="diag-all-note">同期變化以去年同期為比較基期；公式見上方「計算說明」。</p>
-          <div class="table-scroll">
-            <table class="metric-table diagnosis-table diagnosis-all">
-              <thead>
-                <tr>
-                  <th scope="col" class="align-left">指標</th>
-                  <th scope="col">遠銀數值</th>
-                  <th scope="col">遠銀同期變化</th>
-                  <th scope="col">市場同期變化</th>
-                  <th scope="col">與市場比較</th>
-                  <th scope="col">市占率同期變化</th>
-                  <th scope="col">銀行排名變化</th>
-                </tr>
-              </thead>
-              <tbody id="diagnosis-tbody"></tbody>
-            </table>
-          </div>
-        </details>
       </div>
     </div>
   </section>
@@ -239,16 +208,13 @@
     </div>
 
     <details class="methodology-details container" id="peers-methodology">
-      <summary>資料來源與計算說明</summary>
+      <summary>資料說明</summary>
       <div class="methodology-content">
         <ul class="methodology-list">
-          <li>流通卡前12大銀行名單：依所選資料月份月底流通卡數，從銀行中選出前12大。遠銀入選時標示「本行」，未入選時不額外加入第13家。</li>
-          <li>表內排名與「遠銀排名與同業差距」區塊口徑一致：流通卡前12大銀行模式下，名次為「所選指標」於這12家銀行中之排名；全部發卡機構模式下，名次為當月全部發卡機構中之排名。兩種模式之排名母體皆與目前顯示範圍相同，不因搜尋或排序而重新計算。</li>
-          <li>全部發卡機構模式使用當月完整發卡機構名單（銀行與非銀行，家數依資料而定）；切換範圍、搜尋與排序只改變顯示列，不改變排名母體或市占率分母。</li>
-          <li>市占率分母為整體市場定義（市場合計數值），不是比較範圍內的加總；有效卡率與每卡簽帳金額不適用市占率，該欄顯示「不適用」。</li>
-          <li>同期排名比較：當月指標與去年同月排名比較；YTD 指標與去年同期（相同累計數據方式）排名比較，皆採目前所選範圍之排名母體；遠銀缺排名資料時，明確顯示「不適用」，不強算名次變化。</li>
-          <li>「遠銀排名與同業差距」區塊之距前一名／領先後一名，為遠銀於目前所選範圍（12家銀行或32家發卡機構）排名中實際相鄰之同業。與遠銀差額＝同業所選指標值－遠銀所選指標值。正值表示同業數值高於遠銀，負值表示低於遠銀；差額為數值比較，不代表經營優劣。單位：金額為億元、卡數為張、每卡金額為元／張、有效卡率為 pp。</li>
-          <li>距前一名＝前一名數值－遠銀數值；領先後一名＝遠銀數值－後一名數值。兩者僅為目前數值差距，不推論未來排名變化。</li>
+          <li>資料來源：金融監督管理委員會銀行局信用卡業務統計資料。</li>
+          <li>流通卡前12大銀行：依所選月份月底流通卡數排序，取前12名。</li>
+          <li>32家發卡機構：包含銀行及非銀行發卡機構，依所選指標進行排名。</li>
+          <li>與市場差距＝同業數值－遠銀數值；正值表示同業高於遠銀，負值表示同業低於遠銀。</li>
         </ul>
       </div>
     </details>

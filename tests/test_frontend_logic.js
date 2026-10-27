@@ -786,10 +786,10 @@ test("趨勢四圖設定：有效卡率同期比較為 pp、位置為當期比�
   assert.ok(rate.position.series.every(function (s) { return s.key !== "share"; }));
 });
 
-test("趨勢四圖設定：每卡金額位置為銀行同業排名（第1名在上，30家母體），不計算市占率", function () {
+test("趨勢四圖設定：每卡金額位置為發卡機構排名（第1名在上，32家母體），不計算市占率", function () {
   const pc = app.trendPlanFor(app.METRIC_CATALOG.per_card_spending, "ytd");
   assert.strictEqual(pc.position.invert, true);
-  assert.deepStrictEqual(pc.position.domain, [1, 30]);
+  assert.deepStrictEqual(pc.position.domain, [1, 32]);
   assert.ok(pc.position.series.every(function (s) { return s.key !== "share"; }));
   const assets = app.trendPlanFor(app.METRIC_CATALOG.total_assets, "month");
   assert.strictEqual(assets.position.series[0].key, "share", "應收帳款為金額型存量，提供市占率");

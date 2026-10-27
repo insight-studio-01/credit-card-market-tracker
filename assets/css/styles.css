@@ -814,10 +814,11 @@ h2, .section-title {
 .diagnosis-selected td.diag-note { font-size: 16px; font-weight: 500; }
 .diagnosis-selected thead th { font-size: var(--fs-th); }
 
-/* 同業市場基準文字 */
+/* 同業市場基準文字：整行（含前綴文字）依數值狀態統一上色，不是只有數值上色 */
 .peers-market-line strong { font-weight: 800; }
-.peers-market-line strong.delta-pos { color: var(--color-positive); }
-.peers-market-line strong.delta-neg { color: var(--color-negative); }
+.peers-market-line.delta-pos { color: var(--color-positive); }
+.peers-market-line.delta-neg { color: var(--color-negative); }
+.peers-market-line.delta-zero, .peers-market-line.delta-na { color: var(--text-secondary); }
 
 /* 手機版 */
 @media (max-width: 780px) {
@@ -843,11 +844,11 @@ h2, .section-title {
    置於內容區左上角。 */
 .custom-head { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 14px; }
 .mode-switch { display: inline-flex; border: 1px solid var(--baseline); border-radius: var(--radius-sm); overflow: hidden; background: var(--surface-1); }
-.mode-btn { font-family: inherit; font-size: 17px; font-weight: 700; padding: 9px 18px; border: none; background: none; color: var(--text-secondary); cursor: pointer; }
+.mode-btn { font-family: inherit; font-size: 15px; font-weight: 700; padding: 9px 18px; border: none; background: none; color: var(--text-secondary); cursor: pointer; }
 .mode-btn.is-active { background: var(--color-brand-fill); color: #fff; }
 
 .ctl-label, .cmp-field-label { font-size: 15px; font-weight: 700; color: var(--text-secondary); }
-.ctl-input, .ctl-select { font-family: inherit; font-size: 16px; padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--baseline); background: var(--surface-1); color: var(--text-primary); min-width: 0; max-width: 100%; }
+.ctl-input, .ctl-select { font-family: inherit; font-size: 15px; padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid var(--baseline); background: var(--surface-1); color: var(--text-primary); min-width: 0; max-width: 100%; }
 .ctl-input { width: 100%; }
 .custom-controls { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px 18px; padding: 14px 18px; }
 .custom-controls .ctl { display: flex; flex-direction: column; gap: 6px; }
@@ -855,7 +856,7 @@ h2, .section-title {
 .ctl-bank .ctl-select { width: 100%; }
 .seg { display: inline-flex; border: 1px solid var(--baseline); border-radius: var(--radius-sm); overflow: hidden; background: var(--surface-1); flex-wrap: wrap; }
 .seg[hidden] { display: none; }
-.seg-btn { font-family: inherit; font-size: 16px; font-weight: 700; padding: 7px 12px; border: none; border-right: 1px solid var(--baseline); background: none; color: var(--text-secondary); cursor: pointer; }
+.seg-btn { font-family: inherit; font-size: 15px; font-weight: 700; padding: 7px 12px; border: none; border-right: 1px solid var(--baseline); background: none; color: var(--text-secondary); cursor: pointer; }
 .seg-btn:last-child { border-right: none; }
 .seg-btn.is-active { background: var(--color-brand-fill); color: #fff; }
 /* 分析方式切換（歷月趨勢／當期比較）：圖示＋文字並列，圖示永遠跟隨按鈕文字色（currentColor），不使用額外顏色。 */
@@ -880,11 +881,11 @@ h2, .section-title {
 .basis-tag { font-size: 12px; font-weight: 700; color: var(--color-brand); background: var(--color-brand-soft); padding: 1px 8px; border-radius: 999px; }
 .bank-card-body { display: grid; grid-template-columns: minmax(150px, 0.8fr) minmax(0, 1.6fr); gap: 12px; align-items: center; }
 .bank-card-value { font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--text-primary); white-space: nowrap; }
-.bank-card-change { font-size: var(--fs-delta); font-weight: 800; margin-top: 4px; white-space: nowrap; }
+.bank-card-change { font-size: 14px; font-weight: 700; margin-top: 4px; white-space: nowrap; }
 .bank-card-change.delta-pos { color: var(--color-positive); }
 .bank-card-change.delta-neg { color: var(--color-negative); }
 .bank-card-change.delta-zero, .bank-card-change.delta-na { color: var(--text-secondary); font-weight: 600; }
-.bank-card-rank { margin-top: 6px; font-size: 16px; }
+.bank-card-rank { margin-top: 6px; font-size: 14px; }
 .rank-label { color: var(--text-secondary); font-weight: 600; margin-right: 8px; }
 .rank-value { font-weight: 800; color: var(--text-primary); white-space: nowrap; }
 .bank-card-chart { min-width: 0; }
@@ -907,7 +908,7 @@ h2, .section-title {
 /* 個別欄位（而非整列）以 hidden 屬性隱藏時，需明確覆寫 display:flex，否則同特異度下 author stylesheet
    會蓋過瀏覽器內建的 [hidden]{display:none}，造成欄位看起來被隱藏卻仍佔位（見 .filter-field[hidden] 同類修正）。 */
 .ops-inline-field[hidden], .ops-row-divider[hidden] { display: none; }
-.ops-inline-label { flex: 0 0 auto; min-width: 70px; font-size: 15px; font-weight: 700; color: var(--text-secondary); white-space: nowrap; }
+.ops-inline-label { flex: 0 0 auto; min-width: 70px; font-size: 14px; font-weight: 700; color: var(--text-secondary); white-space: nowrap; }
 .ops-row-divider { width: 1px; align-self: stretch; background: var(--border-hairline); margin: 2px 18px; }
 .ops-bank-field .ops-bank-trigger { flex: 1 1 auto; min-width: 0; }
 /* 第一排「選擇銀行｜統計方式」各佔約一半寬度，分隔線落在整排正中央：兩欄 flex-basis 皆為0、
@@ -1042,7 +1043,7 @@ h2, .section-title {
 @media (max-width: 780px) {
   .bank-card-body { grid-template-columns: 1fr; }
   .bank-card-value { font-size: 22px; white-space: normal; }
-  .bank-card-change { font-size: 20px; white-space: normal; }
+  .bank-card-change { white-space: normal; }
   .custom-controls .ctl { width: 100%; }
   .seg-btn { font-size: 15px; padding: 7px 9px; }
   .mode-btn { font-size: 15px; padding: 8px 12px; }
@@ -1062,7 +1063,7 @@ h2, .section-title {
 }
 /* v8 微調：銀行卡片統計欄可換行、圖表欄寬加大 */
 .bank-card-body { grid-template-columns: minmax(170px, 0.95fr) minmax(0, 1.45fr); }
-.bank-card-change { white-space: normal; font-size: 21px; line-height: 1.3; }
+.bank-card-change { white-space: normal; line-height: 1.3; }
 .bank-card-value { white-space: normal; }
 @media (max-width: 780px) { .bank-card-body { grid-template-columns: 1fr; } }
 /* v8 微調：圖表容器不超出畫面；頁籤文字不換行 */
@@ -1095,7 +1096,6 @@ table.sr-only { display: block; width: 1px; height: 1px; overflow: hidden; }
 .custom-range-row .ctl-select { height: 44px; width: 100%; box-sizing: border-box; }
 .custom-range-row .filter-note { min-height: 44px; }
 .custom-controls { display: block; }
-#bank-controls .ctl-select, #bank-controls .ctl-input { font-size: 16px; }
 @media (max-width: 780px) {
   .custom-range-row { grid-template-columns: minmax(0, 1fr); }
   .filter-control.seg .seg-btn { font-size: 15px; padding: 0 6px; }
@@ -1352,7 +1352,7 @@ h2, .section-title { padding-bottom: 6px; }
 #period-select { padding: 5px 9px; }
 .metric-select { padding: 5px 9px; }
 
-/* 卡片內距與區塊間距：收斂留白，不縮小卡片內數字字級 */
+/* 卡片內距與區塊間距：收斂留白；主要數值字級維持醒目，其餘輔助數字已與同業比較頁對齊縮小 */
 .bank-card { padding: 11px 13px; }
 .chart-card { padding: 10px 12px 8px; margin-bottom: 11px; }
 .peer-stat { padding: 11px 13px; }

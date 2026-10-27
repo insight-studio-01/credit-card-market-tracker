@@ -1790,7 +1790,7 @@
   var TREND_FE_COLOR = "#e07b1a";
   var TREND_POS_COLOR = "var(--color-brand)";
   var TREND_ZERO_COLOR = "var(--baseline)";
-  var TREND_RANK_COUNT = 30;
+  var TREND_RANK_COUNT = 32;
 
   function isCardMetric(metric) {
     return metric.id === "cards_in_force" || metric.id === "active_cards" || metric.id === "cards_issued";
@@ -1950,14 +1950,14 @@
     } else if (kind === "flow_no_share") {
       position = {
         kind: "line",
-        title: "遠銀｜" + name + "銀行同業排名（" + TREND_RANK_COUNT + "家）",
+        title: "遠銀｜" + name + "發卡機構排名（" + TREND_RANK_COUNT + "家）",
         unit: "名次（第1名在上）",
         series: [{
-          key: "rank", label: "遠銀銀行同業排名", prev: false, color: TREND_FE_COLOR,
+          key: "rank", label: "遠銀發卡機構排名", prev: false, color: TREND_FE_COLOR,
           periodOf: function (p) { return p; },
           value: function (p) {
             var v = metricView(metric, findFarEastern(p), pType);
-            return isFiniteNumber(v.bankRank) ? v.bankRank : null;
+            return isFiniteNumber(v.issuerRank) ? v.issuerRank : null;
           },
           fmt: function (v) { return "第" + v + "名"; },
           tipFmt: function (v) { return "第" + v + "名"; },
@@ -1965,7 +1965,7 @@
         invert: true,
         domain: [1, TREND_RANK_COUNT],
         breakAtNewYear: ytd,
-        noteFn: function () { return "排名範圍為全部30家銀行，不因顯示範圍重新排名；每卡金額不計算市占率。"; },
+        noteFn: function () { return "排名範圍為全部32家發卡機構，不因顯示範圍重新排名；每卡金額不計算市占率。"; },
       };
     } else {
       var shareOf = function (p) {
@@ -2269,7 +2269,7 @@
     return { text: "去年同期資料不足", cls: "delta-na", ok: false };
   }
 
-  /** 銀行同業排名結果：第X名｜較去年持平／上升X名／下降X名；以既有30家銀行排名為準。 */
+  /** 發卡機構排名結果：第X名｜較去年持平／上升X名／下降X名；以32家發卡機構（issuer_rank）排名為準。 */
   function diagRankResult(curRank, prevRank) {
     if (!isFiniteNumber(curRank)) return { text: "缺資料", cls: "delta-na" };
     var dir = rankChangeDirection(curRank, prevRank);
@@ -2336,7 +2336,7 @@
     return "<p>" + escapeHtml(diagSummarySentences(feV.yoy, mktV.yoy, gap, sd, isRatio, subj)) + "</p>";
   }
 
-  /** 遠銀表現診斷（所選指標）：滿寬兩排、每排三組「項目＋結果」；不適用項目顯示「不適用」，不另行計算。 */
+  /** 趨勢重點（所選指標）：滿寬兩排、每排三組「項目＋結果」；不適用項目顯示「不適用」，不另行計算。 */
   function renderDiagnosisSelected(period, metric, pType) {
     var grid = document.getElementById("diagnosis-selected-grid");
     var subEl = document.getElementById("diagnosis-subtitle");
@@ -2382,8 +2382,8 @@
         : diagItemHtml("市占率較去年同期變化", "去年同期資料不足", "delta-na"));
     }
 
-    var rk = diagRankResult(feV.bankRank, prevFeV.bankRank);
-    items.push(diagItemHtml("銀行同業排名（30家）", rk.text, rk.cls));
+    var rk = diagRankResult(feV.issuerRank, prevFeV.issuerRank);
+    items.push(diagItemHtml("發卡機構排名（32家）", rk.text, rk.cls));
 
     grid.innerHTML = items.join("");
   }
@@ -2641,11 +2641,17 @@
     if (marketLineEl) {
       var mv = metricView(metric, findMarket(period), pType);
       var isRatio = metric.kind === "ratio";
-      var mvText = isRatio ? (isFiniteNumber(mv.yoy) ? "較去年同期 " + signedPp(mv.yoy) : "缺同期資料")
-        : (isFiniteNumber(mv.yoy) ? "YoY " + signedPct(mv.yoy) : "缺同期資料");
-      var mvCls = isFiniteNumber(mv.yoy) ? deltaClass(Number(mv.yoy.toFixed(2))) : "delta-na";
-      marketLineEl.innerHTML = escapeHtml("整體市場" + metric.label + "同期變化：") + '<strong class="' + mvCls + '">' + escapeHtml(mvText) + '</strong>' +
-        escapeHtml("（比較基準：" + (pType === "ytd" ? "去年同期 YTD" : "去年同月") + "）");
+      if (!isFiniteNumber(mv.yoy)) {
+        marketLineEl.className = "peers-market-line delta-na";
+        marketLineEl.textContent = "市場" + metric.label + "：缺同期資料";
+      } else {
+        var mvLabel = isRatio ? "較去年同期" : "YoY";
+        var mvText = isRatio ? signedPp(mv.yoy) : signedPct(mv.yoy);
+        var mvCls = deltaClass(Number(mv.yoy.toFixed(2)));
+        // 整行文字（含「市場○○ YoY：」）依數值狀態統一上色，不是只有數值上色，方便快速判讀。
+        marketLineEl.className = "peers-market-line " + mvCls;
+        marketLineEl.innerHTML = escapeHtml("市場" + metric.label + " " + mvLabel + "：") + '<strong>' + escapeHtml(mvText) + '</strong>';
+      }
     }
 
     renderPeersTable(period, metric, pType);
@@ -2707,12 +2713,10 @@
     }
     var noteEl = document.getElementById("peers-table-note");
     if (noteEl) {
-      // 兩句短句分行說明「目前顯示」與「排名母體」，避免標題、卡片、備註、表格重複出現「30家」「32家」等字樣，
-      // 也避免寫成一整串冗長句子。
-      var showWord = scope === "all" ? "全部發卡機構" : "流通卡前12大銀行";
-      var poolWord = scope === "all" ? all.length + "家發卡機構" : all.length + "家銀行";
-      noteEl.innerHTML = '<span class="peers-scope-line">目前顯示：' + escapeHtml(showWord) + '</span>' +
-        '<span class="peers-scope-line">排名母體：' + escapeHtml(poolWord) + '</span>';
+      // 僅保留「排名母體」單行，避免與「目前顯示」並存造成使用者誤以為是兩個不同概念；
+      // 母體家數依目前範圍即時計算（all.length），不手動寫死，不因搜尋或排序而改變。
+      var poolWord = scope === "all" ? (all.length + "家發卡機構") : "流通卡前12大銀行";
+      noteEl.innerHTML = '<span class="peers-scope-line">排名母體：' + escapeHtml(poolWord) + '</span>';
     }
     var countEl = document.getElementById("peers-count");
     if (countEl) {
@@ -3020,7 +3024,7 @@
     var header = ["月份（西元）", "月份（民國）", "指標", "數據方式", "遠銀數值（" + valUnit + "）", "市場數值（" + valUnit + "）",
       "遠銀同期變化（" + yoyUnit + "）", "市場同期變化（" + yoyUnit + "）", gapLabel,
       "去年同期遠銀數值（" + valUnit + "）", "去年同期市場數值（" + valUnit + "）",
-      "遠銀市占率（%）", "去年同期遠銀市占率（%）", "遠銀銀行排名（30家）"];
+      "遠銀市占率（%）", "去年同期遠銀市占率（%）", "遠銀發卡機構排名（32家）"];
     var lines = [header.join(",")];
     var supportsShare = metricSupportsShare(metric);
     periods.forEach(function (p) {
@@ -3038,7 +3042,7 @@
         num(prevFeV), num(prevMktV),
         supportsShare && isFiniteNumber(feV.share) ? fx(feV.share) : "",
         supportsShare && isFiniteNumber(prevFeV.share) ? fx(prevFeV.share) : "",
-        isFiniteNumber(feV.bankRank) ? feV.bankRank : "",
+        isFiniteNumber(feV.issuerRank) ? feV.issuerRank : "",
       ].join(","));
     });
     downloadCsv("信用卡市場與同業分析_趨勢資料_" + metric.label + "_" + basisTag + "_" + periods[0] + "至" + periods[periods.length - 1] + ".csv", lines);
