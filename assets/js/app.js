@@ -1524,7 +1524,7 @@
           (up ? "上升 " : "下降 ") + Math.abs(c.rankChangeAmt) + " 名") + "</strong>。" +
           '<span class="mgmt-support">遠銀' + escapeHtml(metric.label) + ' YoY ' +
           num(yoyOk ? signedPct(c.feV.yoy) : "缺同期資料", yoyOk ? deltaClass(Number(c.feV.yoy.toFixed(2))) : "delta-na") +
-          '，目前排名第 ' + escapeHtml(String(c.feV.bankRank)) + ' 名。</span>',
+          '，目前排名第 ' + escapeHtml(String(c.feV.issuerRank)) + ' 名。</span>',
       };
     }
     var rate = c.feV.raw, mkRate = c.mktV.raw;
@@ -1546,7 +1546,7 @@
       var mktV = metricView(metric, mkt, pType);
       var gap = metricRelativeGap(metric, feV, mktV);
       var prevYV = metricView(metric, prevY, pType);
-      var rankChangeAmt = (isFiniteNumber(feV.bankRank) && isFiniteNumber(prevYV.bankRank)) ? (prevYV.bankRank - feV.bankRank) : null;
+      var rankChangeAmt = (isFiniteNumber(feV.issuerRank) && isFiniteNumber(prevYV.issuerRank)) ? (prevYV.issuerRank - feV.issuerRank) : null;
       return { id: id, metric: metric, pType: pType, feV: feV, mktV: mktV, gap: gap, rankChangeAmt: rankChangeAmt, isRatio: metric.kind === "ratio" };
     });
   }
@@ -1643,25 +1643,24 @@
   }
 
   /**
-   * 排名欄：上方為本期名次（靜態數值，依「銀行排名（30家）」母體，不可點擊、不會悄悄換成其他範圍），
-   * 下方為變化（表頭說明「變化較去年同期」，上升紅、退步綠），另提供獨立的「查看同業比較」入口按鈕，
-   * 讓使用者明確知道即將進入同業比較頁（預設範圍可能不同於此處的30家）。
+   * 排名欄：顯示本期「發卡機構排名（32家）」名次（依 issuerRank 母體），數字本身即為可點擊
+   * 入口，點擊後進入同業比較頁並盡量保留目前指標與資料月份設定；下方為名次變化
+   * （表頭說明「變化較去年同期」，上升紅、退步綠）。
    */
   function overviewRankHtml(metricId, feP, prevP, pType) {
-    if (!isFiniteNumber(feP.bankRank)) return '<div class="ov-missing">缺排名資料</div>';
-    var main = '<span class="ov-rank-main">第' + escapeHtml(fmtRank(feP.bankRank)) + '名</span>';
+    if (!isFiniteNumber(feP.issuerRank)) return '<div class="ov-missing">缺排名資料</div>';
+    var main = '<button type="button" class="ov-link-btn ov-peers-link" data-metric="' + metricId +
+      '"><span class="ov-rank-main ov-link-value">第' + escapeHtml(fmtRank(feP.issuerRank)) + '名</span></button>';
     var sub;
-    if (!isFiniteNumber(prevP.bankRank)) {
+    if (!isFiniteNumber(prevP.issuerRank)) {
       sub = '<span class="ov-missing">缺同期資料</span>';
     } else {
-      var d = prevP.bankRank - feP.bankRank;
+      var d = prevP.issuerRank - feP.issuerRank;
       if (d > 0) sub = '<span class="ov-rank-change delta-pos">↑' + d + '名</span>';
       else if (d < 0) sub = '<span class="ov-rank-change delta-neg">↓' + (-d) + '名</span>';
       else sub = '<span class="ov-rank-change delta-zero">持平</span>';
     }
-    var goto = '<button type="button" class="ov-link-btn ov-peers-link ov-rank-goto" data-metric="' + metricId +
-      '">查看同業比較 <span aria-hidden="true">›</span></button>';
-    return main + '<div class="ov-rank-sub">' + sub + '</div>' + goto;
+    return main + '<div class="ov-rank-sub">' + sub + '</div>';
   }
 
   /** 市場或遠銀數值格：上方為本期值，下方為同期變化（YOY 或較去年同期 pp）。 */
@@ -1692,11 +1691,6 @@
         (state.overviewBasis === "ytd" ? "YTD。" : "單月。");
     }
     var scale = overviewGapScale(period);
-    var scaleNote = document.getElementById("overview-scale-note");
-    if (scaleNote) {
-      scaleNote.textContent = "橫條向左代表低於市場，向右代表高於市場。";
-      scaleNote.title = "差異條共同尺度 ±" + scale + " pp（所有 YoY 列一致；有效卡率不納入，另以當月比率比較呈現）。相對市場差＝遠銀 YoY－市場 YoY。";
-    }
 
     OVERVIEW_GROUPS.forEach(function (group) {
       var groupTr = document.createElement("tr");
@@ -1721,7 +1715,7 @@
           overviewValueCell(metric, mktP, id, "整體市場") +
           overviewValueCell(metric, feP, id, "遠銀") +
           '<td class="ov-rel" data-label="與市場比較">' + overviewRelHtml(metric, feP, mktP, gap, scale) + '</td>' +
-          '<td class="ov-rank-cell" data-label="銀行排名（30家）">' + overviewRankHtml(id, feP, prevP, pType) + '</td>';
+          '<td class="ov-rank-cell" data-label="發卡機構排名（32家）">' + overviewRankHtml(id, feP, prevP, pType) + '</td>';
         tbody.appendChild(tr);
       });
     });
@@ -2986,7 +2980,7 @@
     // R04修正：補上資料月份欄位（西元／民國），避免匯出後脫離檔名即無法判斷資料所屬月份（與趨勢／同業CSV口徑一致）。
     var rocLabel = (parseInt(period.slice(0, 4), 10) - 1911) + "年" + parseInt(period.slice(5, 7), 10) + "月";
     var header = ["資料月份（西元）", "資料月份（民國）", "指標", "數據方式", "單位", "整體市場數值", "市場同期變化（%或pp）", "遠銀數值", "遠銀同期變化（%或pp）",
-      "遠銀與市場比較（pp）", "遠銀銀行排名（30家）", "排名同期變化（名，正值為上升）"];
+      "遠銀與市場比較（pp）", "遠銀發卡機構排名（32家）", "排名同期變化（名，正值為上升）"];
     var lines = [header.join(",")];
     OVERVIEW_GROUPS.forEach(function (group) {
       group.metrics.forEach(function (id) {
@@ -2994,7 +2988,7 @@
         var pType = overviewPeriodType(metric);
         var mktV = metricView(metric, mkt, pType), feV = metricView(metric, fe, pType), prevV = metricView(metric, prevFe, pType);
         var gap = metricRelativeGap(metric, feV, mktV);
-        var rankChange = (isFiniteNumber(feV.bankRank) && isFiniteNumber(prevV.bankRank)) ? prevV.bankRank - feV.bankRank : null;
+        var rankChange = (isFiniteNumber(feV.issuerRank) && isFiniteNumber(prevV.issuerRank)) ? prevV.issuerRank - feV.issuerRank : null;
         var basis = OVERVIEW_BASIS_METRICS.indexOf(id) >= 0 ? basisWord : (metric.kind === "ratio" ? "當月值" : "月底值");
         var unit = metric.kind === "ratio" ? "%" : displayUnit(metric);
         var mktNum = displayNumber(metric, mktV), feNum = displayNumber(metric, feV);
@@ -3003,7 +2997,7 @@
           isFiniteNumber(mktNum) ? mktNum : "", isFiniteNumber(mktV.yoy) ? mktV.yoy.toFixed(2) : "",
           isFiniteNumber(feNum) ? feNum : "", isFiniteNumber(feV.yoy) ? feV.yoy.toFixed(2) : "",
           isFiniteNumber(gap) ? gap.toFixed(2) : "",
-          isFiniteNumber(feV.bankRank) ? feV.bankRank : "", isFiniteNumber(rankChange) ? rankChange : "",
+          isFiniteNumber(feV.issuerRank) ? feV.issuerRank : "", isFiniteNumber(rankChange) ? rankChange : "",
         ].join(","));
       });
     });

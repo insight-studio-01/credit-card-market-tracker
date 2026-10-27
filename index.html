@@ -108,78 +108,19 @@
               <th scope="col" class="th-market">整體市場</th>
               <th scope="col" class="th-fareast">遠銀</th>
               <th scope="col">與市場比較<span class="th-sub">YoY 差距：遠銀－市場</span></th>
-              <th scope="col">銀行排名（30家）<span class="th-sub">變化較去年同期</span></th>
+              <th scope="col">發卡機構排名（32家）<span class="th-sub">變化較去年同期</span></th>
             </tr>
           </thead>
           <tbody id="overview-table-tbody"></tbody>
         </table>
       </div>
-      <p class="overview-scale-note" id="overview-scale-note"></p>
     </div>
 
     <details class="methodology-details container" id="methodology-details">
-  <summary>資料來源與計算說明</summary>
+  <summary>資料來源</summary>
   <div class="methodology-content">
-    <div class="meta-bar" id="meta-bar">
-      <span id="meta-period">資料期間：載入中…</span>
-      <span class="meta-sep">｜</span>
-      <span id="meta-source">來源檔案：載入中…</span>
-      <span class="meta-sep">｜</span>
-      <span id="meta-loaded">頁面資料讀取時間：—</span>
-    </div>
-
-    <h3 class="subhead subhead--sm">資料來源與計算說明</h3>
-    <p>金管會銀行局「信用卡業務統計附表五」；累計簽帳金額、流通卡數、有效卡率為本國發卡機構之一般消費卡（含VISA、Mastercard、JCB、銀聯），排除公司卡。</p>
-
-    <h3 class="subhead subhead--sm">可瀏覽範圍與113年基期規則</h3>
-    <ul class="methodology-list">
-      <li>網站自民國114年1月起提供查詢；民國113年資料僅作為114年單月 YoY 與 YTD YoY 之比較基期，不於月份選單、趨勢圖或明細查詢中出現。</li>
-      <li>114年可利用113年同期資料計算 YoY；115年以114年同期資料計算 YoY。</li>
-    </ul>
-    <h3 class="subhead subhead--sm">首頁計算說明</h3>
-    <ul class="methodology-list">
-      <li>YoY 為同期成長率（本期÷去年同期−1），單位%；適用於流通卡數、有效卡數、發卡數、簽帳金額、流通卡每卡簽帳金額及信用卡應收帳款。</li>
-      <li>有效卡率的年度變化為本期比率－去年同期比率，單位 pp，標示為「較去年同期」，不是百分比成長率。</li>
-      <li>遠銀與市場比較：數量、金額與每卡金額為遠銀 YoY－市場 YoY（單位 pp）；有效卡率為當期遠銀比率－當期市場比率（單位 pp）；信用卡應收帳款以「成長高於／低於市場」表示，不直接判斷經營優劣。</li>
-      <li>發卡數、兩種簽帳金額及流通卡每卡簽帳金額預設 YTD，可切換為單月；流通卡數、有效卡數、有效卡率及信用卡應收帳款為所選當月值。</li>
-      <li>排名比較：當月指標與去年同月排名比較；YTD 指標與去年同期累計排名比較；銀行同業排名範圍為全部30家銀行。缺去年同期資料顯示「缺同期資料」，不視為持平。</li>
-      <li>色彩：紅色為數值增加、排名上升、相對市場超前；綠色為數值減少、排名下降、相對市場落後；灰色為持平或缺資料；橘色為遠銀識別，灰藍色為市場識別。</li>
-    </ul>
-
-    <h3 class="subhead subhead--sm">排名範圍與主要同業定義</h3>
-    <ul class="methodology-list">
-      <li>發卡機構排名範圍固定為全部32家發卡機構；銀行同業排名範圍固定為30家銀行，均不因篩選或僅顯示部分名單而改變。</li>
-      <li>2家非銀行發卡機構（台灣樂天信用卡、台灣美國運通國際）保留發卡機構排名，銀行同業排名顯示「—」。</li>
-      <li>「主要同業」固定定義為所選月份流通卡數前12名銀行，不因切換比較指標而更換成員；遠銀即使不在前12名仍固定顯示。</li>
-    </ul>
-
-    <h3 class="subhead subhead--sm">單月、YTD 與月底值定義</h3>
-    <ul class="methodology-list">
-      <li>流量型指標（發卡數、簽帳金額、簽帳金額＋預借現金）同時提供單月與 YTD 數據方式；YTD 為當年度1月至所選月份加總，每年1月重新起算。</li>
-      <li>流通卡每卡簽帳金額同樣提供單月與 YTD 兩種數據方式，但 YTD 並非各月每卡金額加總：YTD 每卡金額＝YTD 簽帳金額（元）÷所選月流通卡數；單月每卡金額＝當月簽帳金額（元）÷當月流通卡數。</li>
-      <li>存量型指標（流通卡數、有效卡數、有效卡率）為月底時點值，不計算 YTD。</li>
-      <li>信用卡應收帳款（原「總資產」欄位，已更名避免誤解）＝循環信用餘額＋未到期分期付款餘額，為月底時點值，不做 YTD 加總；此數字僅為信用卡應收帳款規模，並非遠銀整體資產負債表之總資產，不可混用。</li>
-    </ul>
-
-    <h3 class="subhead subhead--sm">判讀原則</h3>
-    <ul class="methodology-list">
-      <li>「本行自身變化」＝遠銀本期與去年同期比較之 YoY，僅描述本行自己的成長或衰退，不涉及市場比較。</li>
-      <li>「與市場比較」＝遠銀 YoY－市場 YoY，保留正負號；正值以「超前市場」呈現，負值以「落後市場」呈現。遠銀自身正成長但落後市場時，不得描述為「本行衰退」。</li>
-      <li>比率型指標（有效卡率等）之期間變化一律使用 pp，不計算一般成長率。</li>
-      <li>排名數字越小越好；排名變化＝比較期排名－本期排名，正值為進步。</li>
-      <li>全站配色採臺灣股票看盤習慣（紅漲、綠跌）：數值成長／上升／排名進步／相對市場領先為紅色，下降／衰退／排名退步／相對市場落後為綠色，持平或無法判定為灰色；顏色僅為輔助，所有方向性資訊皆同時搭配文字與正負號／箭頭。市場（灰藍）與遠銀（橘）之圖表識別色固定不變，不受漲跌影響，與此處判讀色分屬不同用途。信用卡應收帳款之增減僅代表方向（上升／下降／高於或低於市場），不代表經營好壞之價值判斷。</li>
-      <li>修正註記（r／R）：原始檔標註前導字母代表該筆數值於申報日後曾異動，已正確解析並保留於 <code>data/processed/source_metadata.json</code>。</li>
-    </ul>
-
-    <h3 class="subhead subhead--sm">主要公式</h3>
-    <ul class="methodology-list">
-      <li>有效卡率 ＝ 有效卡數 ÷ 流通卡數 × 100%；為比率型指標，僅提供排名，不提供市占率（比率無法計算市占率）。</li>
-      <li>市占率 ＝ 機構數值 ÷ 市場合計數值 × 100%（市場數值優先採官方合計列，並與32家明細加總交叉驗證）；僅適用於可直接加總之數量或金額型指標（如流通卡數、有效卡數、發卡數、簽帳金額、信用卡應收帳款）。</li>
-      <li>簽帳金額＋預借現金 ＝ 當月（或 YTD）簽帳金額 ＋ 當月（或 YTD）預借現金金額</li>
-      <li>流通卡每卡簽帳金額 ＝ 簽帳金額（元，依所選單月或 YTD）÷ 當月流通卡數；YTD 模式為 YTD 簽帳金額÷所選月流通卡數，並非各月每卡金額加總。單月與 YTD 皆僅提供排名，不提供市占率（每卡平均無法計算市占率）。</li>
-      <li>信用卡應收帳款 ＝ 循環信用餘額 ＋ 未到期分期付款餘額；為可加總之金額型指標，提供市占率與排名。</li>
-      <li>金額原始單位為新臺幣千元，頁面以億元或元／張呈現；完整公式詳見 <code>docs/calculation-rules.md</code>。</li>
-    </ul>
+    <p>資料來源：金管會銀行局「信用卡業務統計附表五」。</p>
+    <p>排名母體：32家發卡機構。</p>
   </div>
 </details>
   </section>
