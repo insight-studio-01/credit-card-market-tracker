@@ -551,7 +551,7 @@ td.ov-detail-link:focus-visible { outline: 2px solid var(--color-brand); outline
     --chart-height-main: 240px;
     --chart-height-small: 210px;
   }
-  .site-header h1 { font-size: 22px; }
+  .site-header h1 { font-size: 28px; }
   .header-inner { padding: 12px 14px 10px; flex-direction: column; align-items: flex-start; gap: 10px; }
   .header-right { width: 100%; flex-direction: column; align-items: flex-start; gap: 8px; }
   .header-meta { text-align: left; }
@@ -1393,4 +1393,33 @@ h2, .section-title { padding-bottom: 6px; }
 .export-toast-close {
   position: absolute; top: 6px; right: 8px; width: 28px; height: 28px; border: none; background: transparent;
   color: var(--text-muted); font-size: 20px; line-height: 1; cursor: pointer;
+}
+
+/* ==================================================================
+   手機版字級層級統一（僅 max-width:780px；不影響桌機／平板）。
+   六層規則：網站名稱／區塊標題／指標名稱與圖表標題／正文與表格／輔助文字／主要數字。
+   附於檔案最末以確保覆蓋前面各處分散的手機版字級設定，取代各頁各自為政的寫法。
+   分頁、篩選標籤與選單（main-tab／scope-btn／mode-btn／seg-btn／period-select等）
+   維持現狀不動；僅調整下列明確字級層級落差過大的項目。
+   ================================================================== */
+@media (max-width: 780px) {
+  /* 輔助文字（日期資訊、說明收合鈕、圖例按鈕）：原本 11.7–12.9px 偏小不易讀，統一提升至 14px。 */
+  .header-meta-line { font-size: 14px; }
+  .methodology-details summary { font-size: 14px; }
+  .cmp-legend-btn { font-size: 14px; }
+
+  /* 指標名稱與圖表標題：統一為 17–18px，明確小於 20px 區塊標題、大於正文與輔助文字。 */
+  .bank-card-name { font-size: 17px; }
+  .cmp-chart-title { font-size: 18px; }
+  .cmp-table thead th { font-size: 16px; }
+
+  /* 摘要與說明文字：長篇結論句改為一般正文大小，降低整段過重的粗體感；原文字內容不變。 */
+  .mgmt-summary-list li strong { font-size: 16px; font-weight: 700; }
+  .diagnosis-summary { font-size: 16px; }
+
+  /* 核心數字：排名摘要卡數字不宜與其他頁主要數字同級過大，改用與其他輔助數字一致的字級規則。 */
+  .peer-stat-value { font-size: 20px; font-weight: 700; }
+
+  /* 下載／匯出／列印類按鈕：統一為次要文字尺寸；不調整 padding／min-height，點選範圍不變。 */
+  .export-btn, .ghost-btn, .primary-btn { font-size: 14px; }
 }
