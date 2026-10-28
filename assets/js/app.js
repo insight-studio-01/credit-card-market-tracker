@@ -30,7 +30,7 @@
 
   // Header「更新日期」：本站資料實際完成更新的日期，隨每次匯入新月份原始資料時手動更新；
   // 此日期無法由既有資料欄位推算（data/processed 未記錄站內更新時間戳記），故以固定常數維護。
-  var HEADER_UPDATED_AT_LABEL = "2026年10月20日";
+  var HEADER_UPDATED_AT_LABEL = "2026年10月28日";
 
   // 資料明細預設依發卡機構排名由1至32排列（非銀行發卡機構與銀行一併排序，不得先分組）。
   var DETAIL_DEFAULT_SORT = { field: "issuer_rank", dir: "asc" };
@@ -1723,10 +1723,11 @@
 
   function goToMetricTab(tabId, metricId) {
     var metric = METRIC_CATALOG[metricId];
-    // 首頁所有跳轉統一預設「流通卡前12大銀行」範圍（同業比較頁預設範圍），
-    // 使用者如需查看全部32家發卡機構，於同業比較頁自行切換範圍。
+    // 數值儲存格（detail）跳轉維持原預設「流通卡前12大銀行」範圍。
+    // 排名（第X名）跳轉（peers）改為「全部發卡機構」範圍，確保名次與首頁顯示的
+    // 發卡機構排名一致，不會因母體不同（12家 vs 32家）而出現不同名次。
     if (tabId === "detail") { tabId = "peers"; state.peersScope = "top12"; state.peersSearch = ""; }
-    else if (tabId === "peers") { state.peersScope = "top12"; state.peersSearch = ""; }
+    else if (tabId === "peers") { state.peersScope = "all"; state.peersSearch = ""; }
     state.activeMetricId = metricId;
     state.periodType = metric && metricSupportsPeriodType(metric) ? overviewPeriodType(metric) : "month";
     document.querySelectorAll(".metric-select").forEach(function (sel) { sel.value = metricId; });
@@ -3595,6 +3596,8 @@
     var period = cfg.customEnd || state.selectedPeriod;
     var periods = bankPeriods();
     var mkt = findMarket(period);
+    // 排名母體家數依「結束月份」實際資料計算，不手動寫死，避免家數異動時標示與匯出不同步。
+    var issuerCount = issuersInPeriod(period).length;
     titleEl.textContent = bankTitleName(cfg.name) + "｜信用卡業務概況";
     if (metaEl) metaEl.textContent = "結束月份：" + (mkt ? "民國" + periodShortLabel(mkt) : "—");
     var rec = findIssuer(period, cfg.name);
@@ -3611,7 +3614,7 @@
       var view = metricView(metric, rec, pType);
       var now = customValue(metric, view);
       var values = periods.map(function (p) { return customValue(metric, metricView(metric, findIssuer(p, cfg.name), pType)); });
-      var rank = isFiniteNumber(view.bankRank) ? "第" + fmtRank(view.bankRank) + "名" : "無排名資料";
+      var rank = isFiniteNumber(view.issuerRank) ? "第" + fmtRank(view.issuerRank) + "名" : "無排名資料";
       var delta = isFiniteNumber(view.yoy) ? deltaClass(Number(view.yoy.toFixed(2))) : "delta-na";
 
       var card = document.createElement("article");
@@ -3626,7 +3629,7 @@
           '<div class="bank-card-stats">' +
             '<div class="bank-card-value">' + escapeHtml(customFmt(metric, now)) + '</div>' +
             '<div class="bank-card-change ' + delta + '">' + escapeHtml(customChangeText(metric, view)) + '</div>' +
-            '<div class="bank-card-rank"><span class="rank-label">銀行排名（30家）</span><span class="rank-value">' + escapeHtml(rank) + '</span></div>' +
+            '<div class="bank-card-rank"><span class="rank-label">發卡機構排名（' + issuerCount + '家）</span><span class="rank-value">' + escapeHtml(rank) + '</span></div>' +
           '</div>' +
           '<div class="bank-card-chart"></div>' +
         '</div>';
@@ -3646,7 +3649,10 @@
     var cfg = customState.bank;
     var period = cfg.customEnd || state.selectedPeriod;
     var periods = bankPeriods();
-    var header = ["月份（西元）", "月份（民國）", "銀行", "指標", "數據方式", "單位", "本期值", "去年同期值", "同期變化", "同期變化單位", "銀行排名（30家）"];
+    // 標頭母體家數對應「結束月份」（與畫面卡片同一期間）；每列排名數值本身仍依各自月份之
+    // 實際發卡機構排名計算，不因標頭文字固定而有誤差。
+    var issuerCount = issuersInPeriod(period).length;
+    var header = ["月份（西元）", "月份（民國）", "銀行", "指標", "數據方式", "單位", "本期值", "去年同期值", "同期變化", "同期變化單位", "發卡機構排名（" + issuerCount + "家）"];
     var lines = [header.join(",")];
     periods.forEach(function (p) {
       var rec = findIssuer(p, cfg.name);
@@ -3664,7 +3670,7 @@
           csvCell(cfg.name), csvCell(metric.label), customBasisFile(metric, cfg.basis), customUnit(metric).unit,
           isFiniteNumber(nowV) ? nowV : "", isFiniteNumber(prevV) ? prevV : "",
           isFiniteNumber(view.yoy) ? view.yoy.toFixed(2) : "", isRatio ? "pp" : "%",
-          isFiniteNumber(view.bankRank) ? view.bankRank : "",
+          isFiniteNumber(view.issuerRank) ? view.issuerRank : "",
         ].join(","));
       });
     });
@@ -3879,17 +3885,19 @@
   }
 
   function cmpRankFor(d, name, period) {
-    if (name === CMP_MARKET_TOTAL) return null; // 整體市場（總計）不參與銀行排名。
+    if (name === CMP_MARKET_TOTAL) return null; // 整體市場（總計）不參與排名。
     var metric = METRIC_CATALOG[d.metric];
     var view = metricView(metric, cmpRecordFor(period, name), customPType(metric, d.basis));
-    return isFiniteNumber(view.bankRank) ? view.bankRank : null;
+    return isFiniteNumber(view.issuerRank) ? view.issuerRank : null;
   }
 
-  /** 排名欄名稱：沿用指標既有本期值排名（30家銀行），依數據方式標示，避免被誤認為 YOY 排名。 */
-  function cmpRankHeaderLabel(metric, basis) {
+  /** 排名欄名稱：沿用指標既有本期值排名（既有 issuer_rank 欄位，32家發卡機構），依數據方式標示，
+   * 避免被誤認為 YOY 排名；家數依 period（一律為結束月份 a.ce，與畫面表格、CSV口徑一致）實際資料計算，不寫死。 */
+  function cmpRankHeaderLabel(metric, basis, period) {
     var short = METRIC_SHORT_NAMES[metric.id] || metric.label;
     var prefix = metricSupportsPeriodType(metric) ? (basis === "ytd" ? "累計" : "單月") : "";
-    return prefix + short + "排名（30家）";
+    var issuerCount = issuersInPeriod(period).length;
+    return prefix + short + "排名（" + issuerCount + "家）";
   }
 
   /** CSV可讀銀行名稱：整體市場（總計）為內部代碼（__MARKET_TOTAL__），匯出時需轉換為可讀名稱；
@@ -4349,7 +4357,7 @@
       }
       var endP = a.ce;
       var valHead = (a.display === "yoy" ? (isRatio ? "較去年同期（pp）" : "YoY（%）") : metric.label + "（" + unit + "）");
-      var rankHead = cmpRankHeaderLabel(metric, a.basis);
+      var rankHead = cmpRankHeaderLabel(metric, a.basis, a.ce);
       var html = '<table class="cmp-table"><thead><tr><th scope="col">銀行</th><th scope="col">' + escapeHtml(valHead) + '</th>' +
         (a.display === "value" ? '<th scope="col">' + escapeHtml(isRatio ? "較去年同期（pp）" : "YoY（%）") + '</th>' : "") +
         '<th scope="col">' + escapeHtml(rankHead) + '</th></tr></thead><tbody>';
@@ -4394,7 +4402,7 @@
         marker: a.analysis === "trend" ? bankMarker(name) : "circle",
       };
     });
-    var footer = ["資料來源：金管會銀行局信用卡業務統計附表五", "僅顯示圖例中目前可見之銀行；排名範圍為完整30家銀行。"];
+    var footer = ["資料來源：金管會銀行局信用卡業務統計附表五", "僅顯示圖例中目前可見之銀行；排名範圍為完整" + issuersInPeriod(a.ce).length + "家發卡機構。"];
     var hiddenNames = a.banks.filter(function (n) { return customState.cmp.hidden[n]; });
     if (hiddenNames.length) footer.push("已隱藏：" + hiddenNames.map(bankShortName).join("、"));
     composeCanvas(svg, { w: 1600, h: 900, title: cmpCurrentTitle(a), titleSize: 34, subSize: 22, subtitleLines: sub, legend: a.analysis === "trend" ? legend : [], footer: footer }, function (canvas) {
@@ -4412,7 +4420,7 @@
     var vis = cmpVisibleBanks();
     var lines;
     if (a.analysis === "rank") {
-      lines = [["銀行", "比較月份（西元）", "比較月份（民國）", "指標", "數據方式", "顯示數據", "單位", "數值", cmpRankHeaderLabel(metric, a.basis)].join(",")];
+      lines = [["銀行", "比較月份（西元）", "比較月份（民國）", "指標", "數據方式", "顯示數據", "單位", "數值", cmpRankHeaderLabel(metric, a.basis, a.ce)].join(",")];
       vis.forEach(function (name) {
         var v = cmpPointValue(a, name, a.ce);
         lines.push([csvCell(cmpCsvBankName(name)), a.ce, (parseInt(a.ce.slice(0, 4), 10) - 1911) + "年" + parseInt(a.ce.slice(5, 7), 10) + "月",
@@ -4421,7 +4429,7 @@
       });
     } else {
       var periods = cmpPeriods(a);
-      lines = [["月份（西元）", "月份（民國）", "銀行", "指標", "數據方式", "顯示數據", "單位", "數值", cmpRankHeaderLabel(metric, a.basis)].join(",")];
+      lines = [["月份（西元）", "月份（民國）", "銀行", "指標", "數據方式", "顯示數據", "單位", "數值", cmpRankHeaderLabel(metric, a.basis, a.ce)].join(",")];
       periods.forEach(function (p) {
         vis.forEach(function (name) {
           var v = cmpPointValue(a, name, p);
