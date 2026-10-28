@@ -1858,7 +1858,12 @@
     var isRatio = kind === "ratio";
     var unit = trendUnitOf(metric);
     var prefix = flow ? (ytd ? "YTD" : "單月") : "";
-    var name = flow ? prefix + metric.label : metric.label + (isRatio ? "（當月比率）" : "（月底值）");
+    // name：統一動態標題用的「指標＋統計方式」字串，套用於市場／遠銀／YoY比較三張圖；
+    // 流量型於指標前加「YTD／單月」前綴，存量型與比率型於指標後加（月底值／當月比率）。
+    var name = flow ? prefix + " " + metric.label : metric.label + (isRatio ? "（當月比率）" : "（月底值）");
+    // basisPrefix：僅流量型指標才有「YTD ／單月 」前綴（存量型月底值不可硬套 YTD），
+    // 供市占率等「對象｜指標」格式的標題共用，確保切換單月／YTD時標題反映實際計算方式。
+    var basisPrefix = flow ? prefix + " " : "";
     var shortFmt = trendValueFmt(metric, false), fullFmt = trendValueFmt(metric, true);
     var periodChangeApplies = !ytd && (kind === "stock" || (kind === "flow" && pType === "month"));
 
@@ -1888,7 +1893,7 @@
       var bar = kind === "flow" && pType === "month";
       return {
         kind: bar ? "bar" : "line",
-        title: (side === "market" ? "整體市場" : "遠銀") + "｜" + name,
+        title: (side === "market" ? "市場" : "遠銀") + "｜" + name,
         unit: unit,
         series: series,
         zeroBase: bar,
@@ -1919,7 +1924,9 @@
 
     var compare = {
       kind: "line",
-      title: isRatio ? "有效卡率｜較去年同期變化" : name + "｜較去年同期變化（YoY）",
+      // 套用與市場／遠銀圖相同的「對象｜指標（統計方式）」命名規則，統一所有指標；
+      // 比率型仍以 pp 計算與顯示（unit/fmt 不變），標題文字僅共用詞彙，不代表改為百分比年增率。
+      title: "市場 vs 遠銀｜" + name + " YoY",
       unit: isRatio ? "pp" : "%",
       series: [yoySeries("market"), yoySeries("fareast")],
       zeroBase: true,
@@ -1931,7 +1938,7 @@
     if (isRatio) {
       position = {
         kind: "line",
-        title: "有效卡率差｜遠銀－市場",
+        title: "遠銀｜" + metric.label + "差",
         unit: "pp",
         series: [{
           key: "gap", label: "遠銀－市場（當期比率差）", prev: false, color: TREND_POS_COLOR,
@@ -1950,7 +1957,7 @@
     } else if (kind === "flow_no_share") {
       position = {
         kind: "line",
-        title: "遠銀｜" + name + "發卡機構排名（" + TREND_RANK_COUNT + "家）",
+        title: "遠銀｜" + metric.label + "發卡機構排名（" + TREND_RANK_COUNT + "家）",
         unit: "名次（第1名在上）",
         series: [{
           key: "rank", label: "遠銀發卡機構排名", prev: false, color: TREND_FE_COLOR,
@@ -1974,7 +1981,7 @@
       };
       position = {
         kind: "line",
-        title: "遠銀｜" + name + "市占率",
+        title: "遠銀｜" + basisPrefix + metric.label + "市占率",
         unit: "%",
         series: [{
           key: "share", label: "遠銀市占率", prev: false, color: TREND_FE_COLOR,
@@ -2344,7 +2351,7 @@
     if (!grid) return;
     grid.innerHTML = "";
     var mkt = findMarket(period), fe = findFarEastern(period);
-    if (subEl) subEl.textContent = metric.label + "｜" + diagBasisWord(metric, pType) + "｜資料月份：民國" + (mkt ? periodShortLabel(mkt) : "—") + "（所選期間最後一個月）";
+    if (subEl) subEl.textContent = metric.label + "｜" + diagBasisWord(metric, pType);
     if (sumEl) sumEl.innerHTML = diagSummaryHtml(period, metric, pType);
     if (!fe || !mkt) return;
 
@@ -2703,7 +2710,7 @@
 
     // 表格標題不重複列出範圍名稱／家數（已由上方範圍按鈕與下方單行說明標示），僅作為表格區塊標題。
     var titleEl = document.getElementById("peers-table-title");
-    if (titleEl) titleEl.textContent = "同業比較明細";
+    if (titleEl) titleEl.textContent = "同業排名明細";
     var captionEl = document.getElementById("peers-table-caption");
     if (captionEl) {
       // 排名範圍不在此重複列出，已於下方單行說明（noteEl）統一標示，避免同一畫面多處出現「30家」「32家」。
@@ -3063,7 +3070,7 @@
     var labels = {
       overview: "⭳ 匯出市場總覽（CSV）",
       trends: "⭳ 匯出趨勢資料（CSV）",
-      peers: "⭳ 匯出同業比較（CSV）",
+      peers: "⭳ 匯出同業排名（CSV）",
     };
     btn.textContent = labels[state.activeTab] || "⭳ 匯出（CSV）";
   }
@@ -3080,8 +3087,8 @@
 
   var TABS = [
     { id: "overview", label: "市場總覽" },
-    { id: "trends", label: "趨勢分析" },
-    { id: "peers", label: "同業比較" },
+    { id: "trends", label: "遠銀趨勢" },
+    { id: "peers", label: "同業排名" },
     { id: "custom", label: "自訂比較" },
   ];
 

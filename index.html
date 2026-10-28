@@ -127,11 +127,18 @@
 
   <!-- ===================== 趨勢分析 ===================== -->
   <section class="tab-panel" id="tab-trends" role="tabpanel" hidden>
-    <div class="panel">
-      <h2>趨勢分析</h2>
-      <p class="trend-unavailable" id="trends-unavailable" hidden></p>
+    <p class="trend-unavailable" id="trends-unavailable" hidden></p>
 
-      <div id="trends-body">
+    <div id="trends-body">
+      <div class="panel">
+        <h2 id="diagnosis-title">趨勢重點</h2>
+        <p class="diagnosis-subtitle" id="diagnosis-subtitle"></p>
+        <div class="diagnosis-summary" id="diagnosis-summary"></div>
+        <div class="diag-board" id="diagnosis-selected-grid"></div>
+      </div>
+
+      <div class="panel">
+        <h2>遠銀趨勢</h2>
         <div class="trend-grid">
           <article class="trend-card" id="trend-card-market">
             <h3 class="trend-card-title" id="trend-title-market"></h3>
@@ -162,11 +169,6 @@
             <p class="trend-note" id="trend-note-position"></p>
           </article>
         </div>
-
-        <h2 class="section-title" id="diagnosis-title">趨勢重點</h2>
-        <p class="diagnosis-subtitle" id="diagnosis-subtitle"></p>
-        <div class="diagnosis-summary" id="diagnosis-summary"></div>
-        <div class="diag-board" id="diagnosis-selected-grid"></div>
       </div>
     </div>
   </section>
@@ -188,7 +190,7 @@
     </div>
 
     <div class="panel" id="peers-table-wrap">
-      <h2 id="peers-table-title">同業比較明細</h2>
+      <h2 id="peers-table-title">同業排名明細</h2>
       <p class="peers-condition" id="peers-table-caption"></p>
       <p class="peers-scope-explain" id="peers-table-note"></p>
       <p class="peers-market-line" id="peers-market-line"></p>
